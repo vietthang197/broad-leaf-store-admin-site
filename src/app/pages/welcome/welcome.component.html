@@ -1,1 +1,128 @@
-<p>welcome works!</p>
+<div class="search-table-container">
+  <nz-breadcrumb>
+    <nz-breadcrumb-item>List</nz-breadcrumb-item>
+    <nz-breadcrumb-item>Search Table</nz-breadcrumb-item>
+  </nz-breadcrumb>
+
+  <h2>Search Table</h2>
+
+  <nz-card>
+    <form nz-form [formGroup]="searchForm" [nzLayout]="'vertical'">
+      <div [ngClass]="{ 'hidden-form': isCollapsed }">
+        <div nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32 }">
+          <div nz-col [nzXs]="24" [nzSm]="12" [nzMd]="8" [nzLg]="6">
+            <nz-form-item>
+              <nz-form-label>Rule Name</nz-form-label>
+              <nz-form-control>
+                <input nz-input formControlName="ruleName" placeholder="Please enter" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzXs]="24" [nzSm]="12" [nzMd]="8" [nzLg]="6">
+            <nz-form-item>
+              <nz-form-label>Description:</nz-form-label>
+              <nz-form-control>
+                <input nz-input formControlName="description" placeholder="Please enter" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzXs]="24" [nzSm]="12" [nzMd]="8" [nzLg]="6">
+            <nz-form-item>
+              <nz-form-label>Number of Service Calls</nz-form-label>
+              <nz-form-control>
+                <input nz-input formControlName="serviceCalls" placeholder="Please enter" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzXs]="24" [nzSm]="12" [nzMd]="8" [nzLg]="6">
+            <nz-form-item>
+              <nz-form-label>Status:</nz-form-label>
+              <nz-form-control>
+                <nz-select formControlName="status" nzPlaceHolder="Please select">
+                  <nz-option nzValue="running" nzLabel="Running"></nz-option>
+                  <nz-option nzValue="default" nzLabel="Default"></nz-option>
+                </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+        <div nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32 }">
+          <div nz-col [nzXs]="24" [nzSm]="12" [nzMd]="8" [nzLg]="6">
+            <nz-form-item>
+              <nz-form-label>Last Scheduled at:</nz-form-label>
+              <nz-form-control>
+                <nz-date-picker class="full-width" formControlName="lastScheduled" nzPlaceHolder="Please select"></nz-date-picker>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+      </div>
+      <div nz-row>
+        <div nz-col [nzSpan]="24" class="search-buttons">
+          <button nz-button nzType="primary" (click)="search()">Query</button>
+          <button nz-button (click)="reset()">Reset</button>
+          <a nz-button nzType="link" (click)="toggleCollapse()">
+            {{ isCollapsed ? 'Expand' : 'Collapse' }} <i nz-icon [nzType]="isCollapsed ? 'down' : 'up'"></i>
+          </a>
+        </div>
+      </div>
+    </form>
+  </nz-card>
+
+  <nz-card class="mt-16">
+    <div class="table-header">
+      <h3>Enquiry Form</h3>
+      <div class="table-actions">
+        <button nz-button nzType="primary">
+          <i nz-icon nzType="plus"></i>New
+        </button>
+        <button nz-button nzType="default" nzShape="circle">
+          <i nz-icon nzType="reload"></i>
+        </button>
+        <button nz-button nzType="default" nzShape="circle">
+          <i nz-icon nzType="column-height"></i>
+        </button>
+        <button nz-button nzType="default" nzShape="circle">
+          <i nz-icon nzType="setting"></i>
+        </button>
+      </div>
+    </div>
+
+    <nz-table
+      #basicTable
+      [nzData]="listOfData"
+      [nzShowPagination]="true"
+      [nzPageSize]="10"
+      [nzScroll]="{ x: '800px' }"
+    >
+      <thead>
+        <tr>
+          <th [nzWidth]="'60px'" [nzChecked]="checked" [nzIndeterminate]="indeterminate" (nzCheckedChange)="onAllChecked($event)"></th>
+          <th>Rule Name</th>
+          <th>Description</th>
+          <th>Number of Service Calls</th>
+          <th>Status</th>
+          <th>Last Scheduled at</th>
+          <th [nzWidth]="'200px'">Option</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let data of basicTable.data">
+          <td [nzChecked]="setOfCheckedId.has(data.id)" (nzCheckedChange)="onItemChecked(data.id, $event)"></td>
+          <td>{{ data.ruleName }}</td>
+          <td>{{ data.description }}</td>
+          <td>{{ data.serviceCalls }}</td>
+          <td>
+            <nz-badge [nzStatus]="data.status === 'running' ? 'processing' : 'default'" [nzText]="data.status"></nz-badge>
+          </td>
+          <td>{{ data.lastScheduled }}</td>
+          <td>
+            <a>Configuration</a>
+            <nz-divider nzType="vertical"></nz-divider>
+            <a>Subscribe to alerts</a>
+          </td>
+        </tr>
+      </tbody>
+    </nz-table>
+  </nz-card>
+</div>
