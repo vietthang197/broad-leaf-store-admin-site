@@ -14,6 +14,8 @@ import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
+import { environment } from '../../../../environments/environment';
+import { AssetService } from '../../../services/asset.service';
 
 export interface AssetMeta {
   id: string;
@@ -64,14 +66,10 @@ export class ProductAssetsComponent implements OnChanges {
   searchText = '';
   metadataForm: FormGroup;
 
-  // Cấu hình upload
-  uploadUrl = 'http://localhost:8888/api/assets/upload';
-  cdnBaseUrl = 'http://localhost:8888/assets/';
-
   constructor(
     private fb: FormBuilder,
     private message: NzMessageService,
-    // private apiService: ApiService
+    private assetService: AssetService
   ) {
     this.metadataForm = this.fb.group({
       title: [''],
@@ -121,31 +119,31 @@ export class ProductAssetsComponent implements OnChanges {
     formData.append('isPrimary', 'true');
     
     // Giả lập API call
-    setTimeout(() => {
-      // Giả định API trả về assetId
-      const assetId = 'primary_' + Date.now();
+    // setTimeout(() => {
+    //   // Giả định API trả về assetId
+    //   const assetId = 'primary_' + Date.now();
       
-      this.primaryAsset = {
-        id: assetId,
-        url: this.cdnBaseUrl + assetId,
-        isPrimary: true,
-        type: file.type?.startsWith('image/') ? 'IMAGE' : 'VIDEO',
-        title: file.name,
-        tags: []
-      };
+    //   this.primaryAsset = {
+    //     id: assetId,
+    //     url: `${environment.cdnBaseUrl}` + assetId,
+    //     isPrimary: true,
+    //     type: file.type?.startsWith('image/') ? 'IMAGE' : 'VIDEO',
+    //     title: file.name,
+    //     tags: []
+    //   };
       
-      this.isUploading = false;
-      this.emitAssetsUpdated();
-      this.message.success('Tải lên thành công!');
-    }, 1500);
+    //   this.isUploading = false;
+    //   this.emitAssetsUpdated();
+    //   this.message.success('Tải lên thành công!');
+    // }, 1500);
     
     // Thực tế sẽ gọi API:
-    /*
-    this.apiService.uploadAsset(formData).subscribe({
+    
+    this.assetService.uploadAsset(formData).subscribe({
       next: (response) => {
         this.primaryAsset = {
           id: response.assetId,
-          url: this.cdnBaseUrl + response.assetId,
+          url: `${environment.cdnBaseUrl}` + response.assetId,
           isPrimary: true,
           type: file.type?.startsWith('image/') ? 'IMAGE' : 'VIDEO',
           title: file.name,
@@ -160,7 +158,7 @@ export class ProductAssetsComponent implements OnChanges {
         this.message.error('Tải lên thất bại: ' + error.message);
       }
     });
-    */
+    
   }
 
   // Xử lý upload additional assets
@@ -191,7 +189,7 @@ export class ProductAssetsComponent implements OnChanges {
             const assetId = 'additional_' + Date.now() + '_' + i;
             resolve({
               id: assetId,
-              url: this.cdnBaseUrl + assetId,
+              url: `${environment.cdnBaseUrl}` + assetId,
               isPrimary: false,
               type: file.type.startsWith('image/') ? 'IMAGE' : 'VIDEO',
               title: file.name,

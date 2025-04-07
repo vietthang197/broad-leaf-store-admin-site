@@ -7,7 +7,16 @@ import { environment } from '../../environments/environment';
   providedIn: 'root'
 })
 export class AssetService {
+    uploadAsset(formData: FormData) {
+        return this.http.post<any>(`${environment.apiUrl}/assets`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+  }
   private apiUrl = `${environment.apiUrl}/assets`;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) { 
+    
+  }
 } 
