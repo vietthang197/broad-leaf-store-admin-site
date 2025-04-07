@@ -54,6 +54,7 @@
     <div class="section-header">
       <h4>Additional Assets</h4>
       <div class="header-actions">
+        
         <div class="action-buttons">
           <input
             type="file"
@@ -67,19 +68,6 @@
             <span nz-icon nzType="upload"></span>
             Upload
           </button>
-          
-          <div class="icon-actions">
-            <button 
-              nz-button 
-              nzType="text" 
-              nz-tooltip 
-              nzTooltipTitle="View details" 
-              [disabled]="!selectedAsset"
-              (click)="showMetadataPanel()"
-              [class.active-icon]="isMetadataPanelVisible">
-              <span nz-icon nzType="eye" nzTheme="outline"></span>
-            </button>
-          </div>
         </div>
       </div>
     </div>
@@ -89,29 +77,21 @@
       #assetsTable
       [nzData]="filteredAssets"
       [nzPageSize]="10"
-      [nzLoading]="isUploading"
+      [nzLoading]="isUploadingMultiple"
       nzShowSizeChanger
       class="assets-table">
       <thead>
         <tr>
-          <th [nzWidth]="'60px'">
-            
-          </th>
           <th>Preview</th>
           <th>Title</th>
           <th>Type</th>
           <th>Tags</th>
+          <th>Details</th>
           <th>Actions</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let asset of assetsTable.data; let i = index">
-          <td>
-            <label nz-checkbox 
-                   [ngModel]="selectedAsset?.id === asset.id" 
-                   (ngModelChange)="onCheckboxChange($event, asset)">
-            </label>
-          </td>
           <td>
             <div class="asset-preview">
               <img *ngIf="isImage(asset)" [src]="asset.url" [alt]="asset.altText || 'Asset preview'" />
@@ -125,6 +105,16 @@
           <td>
             <nz-tag *ngFor="let tag of asset.tags">{{ tag }}</nz-tag>
             <span *ngIf="!asset.tags?.length" class="no-tags">No tags</span>
+          </td>
+          <td>
+            <button 
+              nz-button 
+              nzType="text" 
+              nz-tooltip 
+              nzTooltipTitle="View details" 
+              (click)="showMetadataPanelForAsset(asset)">
+              <span nz-icon nzType="eye" nzTheme="outline"></span>
+            </button>
           </td>
           <td>
             <button 

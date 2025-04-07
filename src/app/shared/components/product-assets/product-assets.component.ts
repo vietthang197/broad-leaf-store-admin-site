@@ -456,4 +456,18 @@ export class ProductAssetsComponent implements OnChanges {
     // Đóng panel metadata khi thay đổi lựa chọn
     this.isMetadataPanelVisible = false;
   }
+
+  // Phương thức mới để hiển thị panel metadata cho asset cụ thể
+  showMetadataPanelForAsset(asset: AssetMeta): void {
+    // Cập nhật selectedAsset và form
+    this.selectedAsset = asset;
+    this.metadataForm.patchValue({
+      title: asset.title || '',
+      altText: asset.altText || '',
+      tags: asset.tags || []
+    });
+    
+    // Hiển thị panel
+    this.isMetadataPanelVisible = true;
+  }
 } 
