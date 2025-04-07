@@ -1,10 +1,10 @@
 <div class="search-table-container">
   <nz-breadcrumb>
     <nz-breadcrumb-item>List</nz-breadcrumb-item>
-    <nz-breadcrumb-item>Search Table</nz-breadcrumb-item>
+    <nz-breadcrumb-item>Danh sách sản phẩm</nz-breadcrumb-item>
   </nz-breadcrumb>
 
-  <h2>Search Table</h2>
+  <h2>Bộ lọc</h2>
 
   <nz-card>
     <form nz-form [formGroup]="searchForm" [nzLayout]="'vertical'">
@@ -59,10 +59,10 @@
       </div>
       <div nz-row>
         <div nz-col [nzSpan]="24" class="search-buttons">
-          <button nz-button nzType="primary" (click)="search()">Query</button>
-          <button nz-button (click)="reset()">Reset</button>
+          <button nz-button nzType="primary" (click)="search()">Tìm kiếm</button>
+          <button nz-button (click)="reset()">Làm mới</button>
           <a nz-button nzType="link" (click)="toggleCollapse()">
-            {{ isCollapsed ? 'Expand' : 'Collapse' }} <i nz-icon [nzType]="isCollapsed ? 'down' : 'up'"></i>
+            {{ isCollapsed ? 'Mở rộng' : 'Thu gọn' }} <i nz-icon [nzType]="isCollapsed ? 'down' : 'up'"></i>
           </a>
         </div>
       </div>
@@ -71,10 +71,10 @@
 
   <nz-card class="mt-16">
     <div class="table-header">
-      <h3>Enquiry Form</h3>
+      <h3>Dữ liệu</h3>
       <div class="table-actions">
         <button nz-button nzType="primary">
-          <i nz-icon nzType="plus"></i>New
+          <i nz-icon nzType="plus"></i>Thêm mới
         </button>
         <button nz-button nzType="default" nzShape="circle">
           <i nz-icon nzType="reload"></i>
