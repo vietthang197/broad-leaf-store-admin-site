@@ -1,0 +1,136 @@
+.product-form-container {
+  padding: 24px;
+  background-color: #f5f5f5;
+}
+
+.product-header {
+  margin-bottom: 24px;
+}
+
+.product-title {
+  font-size: 24px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: #262626;
+}
+
+.product-subtitle {
+  font-size: 14px;
+  color: #8c8c8c;
+  margin: 0;
+}
+
+.basic-info-card {
+  margin-bottom: 24px;
+  
+  ::ng-deep .ant-card-head {
+    background-color: #fafafa;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  ::ng-deep .ant-card-head-title {
+    font-weight: 500;
+    font-size: 16px;
+  }
+  
+  ::ng-deep .ant-form-item {
+    margin-bottom: 24px;
+  }
+}
+
+.full-width {
+  width: 100%;
+}
+
+.category-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.category-select {
+  flex: 1;
+}
+
+.browse-button {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  height: 32px;
+  
+  i {
+    margin-right: 4px;
+  }
+}
+
+.date-range-container {
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+}
+
+.date-field {
+  flex: 1;
+}
+
+.date-separator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0 8px;
+  height: 32px;
+  color: #8c8c8c;
+}
+
+.end-date-label {
+  margin-bottom: 8px;
+  color: rgba(0, 0, 0, 0.85);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+::ng-deep {
+  .ant-form-item-required::before {
+    display: inline-block;
+    margin-right: 4px;
+    color: #ff4d4f;
+    font-size: 14px;
+    font-family: SimSun, sans-serif;
+    line-height: 1;
+    content: '*';
+  }
+  
+  .ant-radio-button-wrapper-checked.active-yes {
+    background-color: #52c41a !important;
+    border-color: #52c41a !important;
+    color: #fff !important;
+    
+    &::before {
+      background-color: #52c41a !important;
+    }
+  }
+  
+  .ant-radio-button-wrapper.active-no {
+    color: rgba(0, 0, 0, 0.65);
+  }
+  
+  .ant-tooltip {
+    max-width: 300px;
+  }
+  
+  .ant-form-item-label > label .ant-form-item-tooltip {
+    margin-left: 4px;
+  }
+  
+  .ant-input, .ant-select-selector, .ant-picker {
+    height: 32px;
+  }
+  
+  .ant-form-item-label {
+    text-align: left;
+    
+    > label {
+      height: auto;
+    }
+  }
+} 

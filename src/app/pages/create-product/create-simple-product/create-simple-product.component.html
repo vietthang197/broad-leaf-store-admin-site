@@ -1,0 +1,63 @@
+<div class="product-form-container">
+  <div class="product-header">
+    <h2 class="product-title">Thông tin sản phẩm</h2>
+  </div>
+  <form nz-form [formGroup]="productForm">
+  <nz-card nzTitle="Thông tin cơ bản" class="basic-info-card">
+    
+      <nz-form-item>
+        <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired>Tên sản phẩm</nz-form-label>
+        <nz-form-control [nzSm]="18" [nzXs]="24" nzErrorTip="Please input Name!">
+            <input nz-input formControlName="name" placeholder="Product name" class="full-width" />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired>SKU (Mã sản phẩm)</nz-form-label>
+        <nz-form-control [nzSm]="18" [nzXs]="24" nzErrorTip="Please input SKU!">
+            <input nz-input formControlName="sku" placeholder="Product SKU" class="full-width" />
+        </nz-form-control>
+      </nz-form-item>
+      <!-- Uri -->
+      <nz-form-item>
+        <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired>Slug (Đường dẫn sản phẩm SEO)</nz-form-label>
+        <nz-form-control [nzSm]="18" [nzXs]="24" nzErrorTip="Please input Slug!">
+          <input nz-input formControlName="slug" placeholder="Product Uri" class="full-width" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Danh mục chính -->
+      <nz-form-item>
+        <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired>Loại sản phẩm</nz-form-label>
+        <nz-form-control [nzSm]="18" [nzXs]="24">
+          <div class="category-container">
+            <nz-select formControlName="category" nzPlaceHolder="Chọn loại sản phẩm" class="category-select">
+              <nz-option nzValue="category1" nzLabel="Category 1"></nz-option>
+              <nz-option nzValue="category2" nzLabel="Category 2"></nz-option>
+              <nz-option nzValue="category3" nzLabel="Category 3"></nz-option>
+            </nz-select>
+          </div>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Trạng thái hoạt động -->
+      <nz-form-item>
+        <nz-form-label [nzSm]="6" [nzXs]="24">
+          Sản phẩm cho phép mở bán online?
+          <i nz-tooltip nzTooltipTitle="Determines if this product is available for sale" nz-icon nzType="question-circle"></i>
+        </nz-form-label>
+        <nz-form-control [nzSm]="18" [nzXs]="24">
+          <nz-radio-group formControlName="availableOnline" nzButtonStyle="solid">
+            <label nz-radio-button nzValue="true" class="active-yes">Có</label>
+            <label nz-radio-button nzValue="false" class="active-no">Không</label>
+          </nz-radio-group>
+        </nz-form-control>
+      </nz-form-item>
+    
+  </nz-card>
+
+  <nz-card nzTitle="Mô tả sản phẩm" class="basic-info-card">
+
+  </nz-card>
+
+</form>
+</div>
