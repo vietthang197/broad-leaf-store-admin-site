@@ -104,8 +104,6 @@ export class ProductAssetsComponent implements OnChanges {
       this.message.error('File phải nhỏ hơn 10MB!');
       return false;
     }
-    
-    console.log(file.originFileObj);
     // Xử lý upload thủ công thay vì để nz-upload tự xử lý
     this.uploadPrimaryAsset(file as any);
     return false; // Ngăn nz-upload tự động upload
