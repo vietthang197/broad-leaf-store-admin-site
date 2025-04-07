@@ -1,4 +1,5 @@
 export const environment = {
-    apiUrl: 'http://localhost:8888',
-    cdnBaseUrl: 'http://localhost:8888',
+    production: false,
+    apiUrl: 'http://localhost:8080',
+    cdnBaseUrl: 'http://localhost:8080',
 };

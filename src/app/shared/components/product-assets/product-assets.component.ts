@@ -105,6 +105,7 @@ export class ProductAssetsComponent implements OnChanges {
       return false;
     }
     
+    console.log(file.originFileObj);
     // Xử lý upload thủ công thay vì để nz-upload tự xử lý
     this.uploadPrimaryAsset(file as any);
     return false; // Ngăn nz-upload tự động upload
@@ -116,7 +117,7 @@ export class ProductAssetsComponent implements OnChanges {
     // Tạo FormData để upload
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('isPrimary', 'true');
+    // formData.append('isPrimary', 'true');
     
     // Giả lập API call
     // setTimeout(() => {
@@ -141,17 +142,18 @@ export class ProductAssetsComponent implements OnChanges {
     
     this.assetService.uploadAsset(formData).subscribe({
       next: (response) => {
-        this.primaryAsset = {
-          id: response.assetId,
-          url: `${environment.cdnBaseUrl}` + response.assetId,
-          isPrimary: true,
-          type: file.type?.startsWith('image/') ? 'IMAGE' : 'VIDEO',
-          title: file.name,
-          tags: []
-        };
-        this.isUploading = false;
-        this.emitAssetsUpdated();
-        this.message.success('Tải lên thành công!');
+        console.log(response);
+        // this.primaryAsset = {
+        //   id: response.assetId,
+        //   url: `${environment.cdnBaseUrl}` + response.assetId,
+        //   isPrimary: true,
+        //   type: file.type?.startsWith('image/') ? 'IMAGE' : 'VIDEO',
+        //   title: file.name,
+        //   tags: []
+        // };
+        // this.isUploading = false;
+        // this.emitAssetsUpdated();
+        // this.message.success('Tải lên thành công!');
       },
       error: (error) => {
         this.isUploading = false;

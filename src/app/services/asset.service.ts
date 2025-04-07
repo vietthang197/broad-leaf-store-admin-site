@@ -8,7 +8,7 @@ import { environment } from '../../environments/environment';
 })
 export class AssetService {
     uploadAsset(formData: FormData) {
-        return this.http.post<any>(`${environment.apiUrl}/assets`, formData, {
+        return this.http.post<any>(`${environment.apiUrl}/api/v1/asset/upload`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
