@@ -18,6 +18,8 @@ import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { CommonModule } from '@angular/common';
+import { ProductAssetsComponent } from '../../../shared/components/product-assets/product-assets.component';
+import { AssetMeta } from '../../../shared/components/product-assets/product-assets.component';
 
 interface CustomAttribute {
   name: string;
@@ -49,7 +51,8 @@ interface CustomAttribute {
     NzCascaderModule,
     NzModalModule,
     NzTableModule,
-    NzTagModule
+    NzTagModule,
+    ProductAssetsComponent
   ]
 })
 export class CreateSimpleProductComponent implements OnInit {
@@ -58,6 +61,7 @@ export class CreateSimpleProductComponent implements OnInit {
   customAttributes: CustomAttribute[] = [];
   isAttributeModalVisible = false;
   isAttributeModalLoading = false;
+  isEditMode = false;
   
   quillModules = {
     toolbar: [
@@ -83,6 +87,8 @@ export class CreateSimpleProductComponent implements OnInit {
     value: 'VND'
   }]
 
+  productAssets: AssetMeta[] = [];
+  
   constructor(private fb: FormBuilder) {}
 
   ngOnInit(): void {
@@ -103,6 +109,11 @@ export class CreateSimpleProductComponent implements OnInit {
     });
 
     this.initAttributeForm();
+    
+    // Nếu đang chỉnh sửa sản phẩm, load assets từ API
+    if (this.isEditMode) {
+      this.loadProductAssets();
+    }
   }
 
   private initAttributeForm(): void {
@@ -182,5 +193,49 @@ export class CreateSimpleProductComponent implements OnInit {
 
   isArray(value: any): boolean {
     return Array.isArray(value);
+  }
+
+  loadProductAssets(): void {
+    // Giả lập API call để lấy assets của sản phẩm
+    // Trong thực tế, bạn sẽ gọi API service
+    setTimeout(() => {
+      this.productAssets = [
+        {
+          id: 'primary_123',
+          url: 'http://localhost:8888/assets/primary_123',
+          isPrimary: true,
+          type: 'IMAGE',
+          title: 'Primary Product Image',
+          altText: 'Product main view',
+          tags: ['main', 'featured']
+        },
+        {
+          id: 'additional_456',
+          url: 'http://localhost:8888/assets/additional_456',
+          isPrimary: false,
+          type: 'IMAGE',
+          title: 'Side view',
+          altText: 'Product side view',
+          tags: ['side']
+        }
+        // Thêm các assets khác nếu cần
+      ];
+    }, 1000);
+  }
+  
+  onAssetsUpdated(assets: AssetMeta[]): void {
+    this.productAssets = assets;
+    
+    // Cập nhật form value nếu cần
+    const primaryAsset = assets.find(a => a.isPrimary);
+    if (primaryAsset) {
+      // Ví dụ: cập nhật một trường trong form chính
+      // this.productForm.patchValue({
+      //   primaryImageUrl: primaryAsset.url
+      // });
+    }
+    
+    // Có thể lưu tạm thời hoặc gửi lên server
+    console.log('Assets updated:', assets);
   }
 }

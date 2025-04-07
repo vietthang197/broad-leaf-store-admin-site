@@ -168,7 +168,10 @@
   </nz-modal>
 
   <nz-card nzTitle="Product Assets" class="basic-info-card">
-
+    <app-product-assets
+      [initialAssets]="productAssets"
+      (assetsUpdated)="onAssetsUpdated($event)">
+    </app-product-assets>
   </nz-card>
 </form>
 </div>

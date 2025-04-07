@@ -1,0 +1,219 @@
+<div class="product-assets-container">
+  <div class="assets-header">
+    <h3>Assets</h3>
+    <p class="description">Configure the product's primary asset and upload any additional assets.</p>
+  </div>
+
+  <!-- Primary Asset Section -->
+  <div class="primary-asset-section">
+    <h4>Primary Asset</h4>
+    <div class="primary-asset-upload">
+      <div class="upload-container" [class.has-asset]="primaryAsset">
+        <nz-upload
+          [nzAction]="uploadUrl"
+          [nzBeforeUpload]="beforeUpload"
+          [nzShowUploadList]="false"
+          nzListType="picture-card"
+          [nzDisabled]="isUploading">
+          <ng-container *ngIf="!primaryAsset; else primaryAssetTemplate">
+            <div class="upload-placeholder">
+              <ng-container *ngIf="!isUploading; else uploadingTemplate">
+                <span nz-icon nzType="plus"></span>
+                <div class="upload-text">Drop file here, or click to upload</div>
+              </ng-container>
+              <ng-template #uploadingTemplate>
+                <nz-spin nzTip="Uploading..."></nz-spin>
+              </ng-template>
+            </div>
+          </ng-container>
+          <ng-template #primaryAssetTemplate>
+            <div class="primary-asset-preview">
+              <img *ngIf="isImage(primaryAsset)" [src]="primaryAsset?.url" [alt]="primaryAsset?.altText || 'Primary asset'" />
+              <div *ngIf="isVideo(primaryAsset)" class="video-placeholder">
+                <span nz-icon nzType="play-circle" nzTheme="outline"></span>
+                <span>Video</span>
+              </div>
+              <button 
+                nz-button 
+                nzType="primary" 
+                nzDanger 
+                nzShape="circle" 
+                class="delete-button"
+                (click)="deletePrimaryAsset(); $event.stopPropagation()">
+                <span nz-icon nzType="delete"></span>
+              </button>
+            </div>
+          </ng-template>
+        </nz-upload>
+      </div>
+    </div>
+  </div>
+
+  <!-- Additional Assets Section -->
+  <div class="additional-assets-section">
+    <div class="section-header">
+      <h4>Additional Assets</h4>
+      <div class="header-actions">
+        <nz-input-group [nzSuffix]="suffixIconSearch">
+          <input type="text" nz-input placeholder="Find by name or tags..." [(ngModel)]="searchText" />
+        </nz-input-group>
+        <ng-template #suffixIconSearch>
+          <span nz-icon nzType="search"></span>
+        </ng-template>
+        
+        <div class="action-buttons">
+          <input
+            type="file"
+            #fileInput
+            multiple
+            style="display: none"
+            (change)="uploadAdditionalAssets($event)"
+            accept="image/*,video/*"
+          />
+          <button nz-button nzType="primary" (click)="fileInput.click()" [nzLoading]="isUploading">
+            <span nz-icon nzType="upload"></span>
+            Upload
+          </button>
+          
+          <div class="icon-actions">
+            <button nz-button nzType="text" nz-tooltip nzTooltipTitle="Set as featured">
+              <span nz-icon nzType="star" nzTheme="outline"></span>
+            </button>
+            <button nz-button nzType="text" nz-tooltip nzTooltipTitle="Delete selected" [disabled]="!selectedAsset">
+              <span nz-icon nzType="delete" nzTheme="outline"></span>
+            </button>
+            <button 
+              nz-button 
+              nzType="text" 
+              nz-tooltip 
+              nzTooltipTitle="View details" 
+              [disabled]="!selectedAsset"
+              (click)="showMetadataPanel()"
+              [class.active-icon]="isMetadataPanelVisible">
+              <span nz-icon nzType="eye" nzTheme="outline"></span>
+            </button>
+            <button nz-button nzType="text" nz-tooltip nzTooltipTitle="Grid view">
+              <span nz-icon nzType="appstore" nzTheme="outline"></span>
+            </button>
+            <button nz-button nzType="text" nz-tooltip nzTooltipTitle="Open in new tab">
+              <span nz-icon nzType="link" nzTheme="outline"></span>
+            </button>
+            <button nz-button nzType="text" nz-tooltip nzTooltipTitle="Download">
+              <span nz-icon nzType="download" nzTheme="outline"></span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Assets Table -->
+    <nz-table
+      #assetsTable
+      [nzData]="filteredAssets"
+      [nzPageSize]="10"
+      [nzLoading]="isUploading"
+      nzShowSizeChanger
+      class="assets-table">
+      <thead>
+        <tr>
+          <th>Preview</th>
+          <th>Title</th>
+          <th>Type</th>
+          <th>Tags</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr 
+          *ngFor="let asset of assetsTable.data; let i = index" 
+          (click)="selectAsset(asset)"
+          [class.selected-row]="selectedAsset?.id === asset.id">
+          <td>
+            <div class="asset-preview">
+              <img *ngIf="isImage(asset)" [src]="asset.url" [alt]="asset.altText || 'Asset preview'" />
+              <div *ngIf="isVideo(asset)" class="video-preview">
+                <span nz-icon nzType="play-circle" nzTheme="outline"></span>
+              </div>
+            </div>
+          </td>
+          <td>{{ asset.title }}</td>
+          <td>{{ asset.type }}</td>
+          <td>
+            <nz-tag *ngFor="let tag of asset.tags">{{ tag }}</nz-tag>
+            <span *ngIf="!asset.tags?.length" class="no-tags">No tags</span>
+          </td>
+          <td>
+            <button 
+              nz-button 
+              nzType="text" 
+              nzDanger 
+              (click)="deleteAdditionalAsset(i); $event.stopPropagation()">
+              <span nz-icon nzType="delete"></span>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </nz-table>
+  </div>
+
+  <!-- Metadata Panel (Draggable) -->
+  <div 
+    *ngIf="isMetadataPanelVisible && selectedAsset" 
+    class="metadata-panel"
+    cdkDrag
+    [cdkDragDisabled]="false"
+    (cdkDragDropped)="onDragDropped($event)">
+    <div class="panel-header" cdkDragHandle>
+      <h4>Asset Details</h4>
+      <button nz-button nzType="text" (click)="hideMetadataPanel()">
+        <span nz-icon nzType="close"></span>
+      </button>
+    </div>
+    
+    <div class="panel-content">
+      <div class="asset-preview-large">
+        <img *ngIf="isImage(selectedAsset)" [src]="selectedAsset.url" [alt]="selectedAsset.altText || 'Asset preview'" />
+        <div *ngIf="isVideo(selectedAsset)" class="video-preview-large">
+          <span nz-icon nzType="play-circle" nzTheme="outline"></span>
+          <span>Video</span>
+        </div>
+      </div>
+      
+      <div class="metadata-form" [formGroup]="metadataForm">
+        <div class="form-item">
+          <label>Type</label>
+          <input nz-input [value]="selectedAsset.type" disabled />
+        </div>
+        
+        <div class="form-item">
+          <label>URL</label>
+          <input nz-input [value]="selectedAsset.url" disabled />
+        </div>
+        
+        <div class="form-item">
+          <label>Alt Text</label>
+          <input nz-input formControlName="altText" placeholder="Enter alt text for SEO" />
+        </div>
+        
+        <div class="form-item">
+          <label>Title</label>
+          <input nz-input formControlName="title" placeholder="Enter asset title" />
+        </div>
+        
+        <div class="form-item">
+          <label>Tags</label>
+          <nz-select
+            formControlName="tags"
+            nzMode="tags"
+            nzPlaceHolder="Add tags"
+            class="tag-select">
+          </nz-select>
+        </div>
+      </div>
+      
+      <div class="panel-footer">
+        <button nz-button nzType="primary" (click)="saveMetadata()">Save</button>
+      </div>
+    </div>
+  </div>
+</div> 
