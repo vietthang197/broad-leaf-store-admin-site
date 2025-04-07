@@ -24,8 +24,8 @@ interface DataItem {
 }
 
 @Component({
-  selector: 'app-welcome',
-  templateUrl: './welcome.component.html',
+  selector: 'app-products',
+  templateUrl: './products.component.html',
   imports: [
     NzBreadCrumbComponent,
     NzBreadCrumbItemComponent,
@@ -49,9 +49,9 @@ interface DataItem {
     NzThMeasureDirective,
     NgClass
   ],
-  styleUrls: ['./welcome.component.scss']
+  styleUrls: ['./products.component.scss']
 })
-export class WelcomeComponent implements OnInit {
+export class ProductsComponent implements OnInit {
   searchForm!: FormGroup;
   isCollapsed = false;
   checked = false;
