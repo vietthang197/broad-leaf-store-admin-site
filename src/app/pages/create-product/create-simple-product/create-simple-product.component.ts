@@ -11,6 +11,7 @@ import { NzRadioModule } from 'ng-zorro-antd/radio';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { NzGridModule } from 'ng-zorro-antd/grid';
+import { QuillModule } from 'ngx-quill';
 
 @Component({
   selector: 'app-create-simple-product',
@@ -28,27 +29,42 @@ import { NzGridModule } from 'ng-zorro-antd/grid';
     NzRadioModule,
     NzIconModule,
     NzToolTipModule,
-    NzGridModule
+    NzGridModule,
+    QuillModule
   ]
 })
 export class CreateSimpleProductComponent implements OnInit {
   productForm!: FormGroup;
+  quillModules = {
+    toolbar: [
+      ['bold', 'italic', 'underline', 'strike'],
+      ['blockquote', 'code-block'],
+      [{ 'header': 1 }, { 'header': 2 }],
+      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+      [{ 'script': 'sub'}, { 'script': 'super' }],
+      [{ 'indent': '-1'}, { 'indent': '+1' }],
+      [{ 'direction': 'rtl' }],
+      [{ 'size': ['small', false, 'large', 'huge'] }],
+      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+      [{ 'color': [] }, { 'background': [] }],
+      [{ 'font': [] }],
+      [{ 'align': [] }],
+      ['clean'],
+      ['link', 'image', 'video']
+    ]
+  };
 
   constructor(private fb: FormBuilder) {}
 
   ngOnInit(): void {
-    // Khởi tạo form với giá trị mặc định
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    tomorrow.setHours(0, 0, 0, 0);
-
     this.productForm = this.fb.group({
       productType: ['SIMPLE', Validators.required],
       name: [null, [Validators.required]],
       sku: [null, [Validators.required]],
       slug: [null, [Validators.required]],
-      category: [null, Validators.required],
-      availableOnline: [true, Validators.required]
+      category: [null, [Validators.required]],
+      availableOnline: ['true', [Validators.required]],
+      description: [null, [Validators.required]]
     });
   }
 

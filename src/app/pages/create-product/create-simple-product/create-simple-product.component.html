@@ -56,7 +56,17 @@
   </nz-card>
 
   <nz-card nzTitle="Mô tả sản phẩm" class="basic-info-card">
-
+    <nz-form-item>
+      <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired>Mô tả sản phẩm</nz-form-label>
+      <nz-form-control [nzSm]="18" [nzXs]="24" nzErrorTip="Vui lòng nhập mô tả sản phẩm!">
+        <quill-editor
+          formControlName="description"
+          [styles]="{height: '200px'}"
+          [modules]="quillModules"
+          placeholder="Nhập mô tả chi tiết về sản phẩm">
+        </quill-editor>
+      </nz-form-control>
+    </nz-form-item>
   </nz-card>
 
 </form>
