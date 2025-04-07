@@ -73,7 +73,7 @@
     <div class="table-header">
       <h3>Dữ liệu</h3>
       <div class="table-actions">
-        <button nz-button nzType="primary">
+        <button nz-button nzType="primary" (click)="showAddProductModal()">
           <i nz-icon nzType="plus"></i>Thêm mới
         </button>
         <button nz-button nzType="default" nzShape="circle">
@@ -126,3 +126,31 @@
     </nz-table>
   </nz-card>
 </div>
+
+<!-- Modal thêm mới sản phẩm -->
+<nz-modal
+  [(nzVisible)]="isAddProductModalVisible"
+  nzTitle="Thêm mới sản phẩm"
+  (nzOnCancel)="handleCancel()"
+  [nzFooter]="modalFooter"
+>
+  <ng-container *nzModalContent>
+    <form nz-form [formGroup]="addProductTypeForm">
+      <nz-form-item>
+        <nz-form-label [nzSpan]="6" nzRequired>Loại sản phẩm</nz-form-label>
+        <nz-form-control [nzSpan]="18" nzErrorTip="Vui lòng chọn loại sản phẩm!">
+          <nz-select formControlName="productType" nzPlaceHolder="Chọn loại sản phẩm">
+            <nz-option nzValue="SIMPLE" nzLabel="SIMPLE (Sản phẩm cơ bản)"></nz-option>
+            <nz-option nzValue="VARIANT" nzLabel="VARIANT (Sản phẩm có nhiều mẫu mã, tùy chọn)"></nz-option>
+            <nz-option nzValue="GROUPED" nzLabel="GROUPED (Nhóm các sản phẩm)"></nz-option>
+            <nz-option nzValue="EXTERNAL" nzLabel="EXTERNAL (Sản phẩm dẫn tới website bên ngoài)"></nz-option>
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </ng-container>
+  <ng-template #modalFooter>
+    <button nz-button nzType="default" (click)="handleCancel()">Hủy</button>
+    <button nz-button nzType="primary" (click)="submitChooseProductType()" [disabled]="!addProductTypeForm.valid">Xác nhận</button>
+  </ng-template>
+</nz-modal>

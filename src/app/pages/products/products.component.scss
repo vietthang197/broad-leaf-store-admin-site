@@ -45,12 +45,8 @@ input[nz-input], nz-select, nz-date-picker {
 // Cải thiện style cho nút tìm kiếm
 .search-buttons {
   display: flex;
-  justify-content: flex-end;
+  gap: 8px;
   margin-top: 16px;
-  
-  button, a {
-    margin-left: 8px;
-  }
 }
 
 // Cải thiện header của bảng
@@ -59,34 +55,11 @@ input[nz-input], nz-select, nz-date-picker {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
-  
-  h3 {
-    margin-bottom: 0;
-    font-weight: 500;
-    color: rgba(0, 0, 0, 0.85);
-  }
-  
-  .table-actions {
-    display: flex;
-    align-items: center;
-    
-    button {
-      margin-left: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      
-      &[nzShape="circle"] {
-        width: 32px;
-        height: 32px;
-        padding: 0;
-      }
-      
-      i {
-        font-size: 14px;
-      }
-    }
-  }
+}
+
+.table-actions {
+  display: flex;
+  gap: 8px;
 }
 
 // Thêm responsive cho các màn hình nhỏ hơn
@@ -116,10 +89,6 @@ input[nz-input], nz-select, nz-date-picker {
 
 // Thêm style cho card
 nz-card {
-  // Card chứa form tìm kiếm
-  &:first-of-type {
-    // Không cần style đặc biệt ở đây nữa
-  }
 
   // Card chứa bảng (Enquiry Form)
   &.mt-16 {
@@ -224,4 +193,13 @@ nz-table {
 // Style cho form ẩn/hiện
 .hidden-form {
   display: none;
+}
+
+// Thêm CSS cho modal
+:host ::ng-deep {
+  .ant-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
 }

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {NzBreadCrumbComponent, NzBreadCrumbItemComponent} from 'ng-zorro-antd/breadcrumb';
 import {NzCardComponent} from 'ng-zorro-antd/card';
 import {NzFormDirective} from 'ng-zorro-antd/form';
@@ -13,6 +13,9 @@ import {NzTableComponent, NzTdAddOnComponent, NzThMeasureDirective, NzThSelectio
 import {NzBadgeComponent} from 'ng-zorro-antd/badge';
 import {NzDividerComponent} from 'ng-zorro-antd/divider';
 import {NgClass, NgForOf} from '@angular/common';
+import {NzMessageService} from 'ng-zorro-antd/message';
+import { NzModalModule } from 'ng-zorro-antd/modal';
+import { Router } from '@angular/router';
 
 interface DataItem {
   id: string;
@@ -47,7 +50,8 @@ interface DataItem {
     NzDividerComponent,
     NgForOf,
     NzThMeasureDirective,
-    NgClass
+    NgClass,
+    NzModalModule
   ],
   styleUrls: ['./products.component.scss']
 })
@@ -60,7 +64,15 @@ export class ProductsComponent implements OnInit {
 
   listOfData: DataItem[] = [];
 
-  constructor(private fb: FormBuilder) {}
+  isAddProductModalVisible = false;
+  addProductTypeForm!: FormGroup;
+
+  constructor(
+    private fb: FormBuilder,
+    private message: NzMessageService,
+    private router: Router
+  
+  ) {}
 
   ngOnInit(): void {
     this.searchForm = this.fb.group({
@@ -69,6 +81,10 @@ export class ProductsComponent implements OnInit {
       serviceCalls: [null],
       status: [null],
       lastScheduled: [null]
+    });
+
+    this.addProductTypeForm = this.fb.group({
+      productType: [null, [Validators.required]]
     });
 
     this.listOfData = Array.from({ length: 100 }).map((_, i) => ({
@@ -116,5 +132,42 @@ export class ProductsComponent implements OnInit {
     const listOfEnabledData = this.listOfData;
     this.checked = listOfEnabledData.every(item => this.setOfCheckedId.has(item.id));
     this.indeterminate = listOfEnabledData.some(item => this.setOfCheckedId.has(item.id)) && !this.checked;
+  }
+
+  showAddProductModal(): void {
+    this.isAddProductModalVisible = true;
+  }
+
+  handleCancel(): void {
+    this.isAddProductModalVisible = false;
+    this.addProductTypeForm.reset();
+  }
+
+  submitChooseProductType(): void {
+    if (this.addProductTypeForm.valid) {
+      const productType = this.addProductTypeForm.get('productType')?.value;
+      switch(productType){
+        case 'SIMPLE':
+          this.router.navigate(['/create-product/simple']);
+          this.handleCancel();
+          break;
+        case 'VARIANT':
+          this.handleCancel();
+          break;
+        case 'GROUPED':
+          this.handleCancel();
+          break;
+        case 'EXTERNAL':
+          this.handleCancel();
+          break;
+      }
+    } else {
+      Object.values(this.addProductTypeForm.controls).forEach(control => {
+        if (control.invalid) {
+          control.markAsDirty();
+          control.updateValueAndValidity({ onlySelf: true });
+        }
+      });
+    }
   }
 }
