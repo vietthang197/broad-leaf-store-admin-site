@@ -160,3 +160,45 @@ textarea.full-width {
   nz-card {
     margin-bottom: 20px;
   }
+
+  /* Styles cho Rich Text Editor */
+:host ::ng-deep .ql-container {
+    font-family: inherit;
+    font-size: inherit;
+    min-height: 200px;
+  }
+  
+  :host ::ng-deep .ql-editor {
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+  }
+  
+  :host ::ng-deep .ql-toolbar {
+    border-radius: 4px 4px 0 0;
+  }
+  
+  :host ::ng-deep .ql-container {
+    border-radius: 0 0 4px 4px;
+  }
+  
+  /* Đảm bảo khoảng cách giữa các card */
+  nz-card {
+    margin-bottom: 20px;
+  }
+  
+  /* Style cho bảng thuộc tính */
+  .ant-table-wrapper {
+    margin-top: 16px;
+  }
+  
+  /* Style cho tags trong bảng */
+  nz-tag {
+    margin-bottom: 4px;
+  }
+  
+  /* Style cho nút Create Attribute */
+  .ant-card-extra button {
+    margin-left: 8px;
+  }
+  

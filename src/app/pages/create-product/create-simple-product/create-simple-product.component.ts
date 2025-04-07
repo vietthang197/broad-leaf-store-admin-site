@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzFormModule } from 'ng-zorro-antd/form';
@@ -12,6 +12,19 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { QuillModule } from 'ngx-quill';
+import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
+import { NzCascaderModule } from 'ng-zorro-antd/cascader';
+import { NzModalModule } from 'ng-zorro-antd/modal';
+import { NzTableModule } from 'ng-zorro-antd/table';
+import { NzTagModule } from 'ng-zorro-antd/tag';
+import { CommonModule } from '@angular/common';
+
+interface CustomAttribute {
+  name: string;
+  value: string;
+  label?: string;
+  supportMultipleValues: boolean;
+}
 
 @Component({
   selector: 'app-create-simple-product',
@@ -19,6 +32,7 @@ import { QuillModule } from 'ngx-quill';
   styleUrls: ['./create-simple-product.component.scss'],
   standalone: true,
   imports: [
+    CommonModule,
     ReactiveFormsModule,
     NzCardModule,
     NzFormModule,
@@ -30,11 +44,21 @@ import { QuillModule } from 'ngx-quill';
     NzIconModule,
     NzToolTipModule,
     NzGridModule,
-    QuillModule
+    QuillModule,
+    NzInputNumberModule,
+    NzCascaderModule,
+    NzModalModule,
+    NzTableModule,
+    NzTagModule
   ]
 })
 export class CreateSimpleProductComponent implements OnInit {
   productForm!: FormGroup;
+  attributeForm!: FormGroup;
+  customAttributes: CustomAttribute[] = [];
+  isAttributeModalVisible = false;
+  isAttributeModalLoading = false;
+  
   quillModules = {
     toolbar: [
       ['bold', 'italic', 'underline', 'strike'],
@@ -54,6 +78,11 @@ export class CreateSimpleProductComponent implements OnInit {
     ]
   };
 
+  currencyList = [{
+    label: 'VND',
+    value: 'VND'
+  }]
+
   constructor(private fb: FormBuilder) {}
 
   ngOnInit(): void {
@@ -64,8 +93,76 @@ export class CreateSimpleProductComponent implements OnInit {
       slug: [null, [Validators.required]],
       category: [null, [Validators.required]],
       availableOnline: ['true', [Validators.required]],
-      description: [null, [Validators.required]]
+      description: [null, [Validators.required]],
+      regularPriceAmount: [null, [Validators.required]],
+      regularPriceCurrency: [null, [Validators.required]],
+      salePriceAmount: [null, [Validators.required]],
+      salePriceCurrency: [null, [Validators.required]],
+      costAmount: [null, [Validators.required]],
+      costCurrency: [null, [Validators.required]]
     });
+
+    this.initAttributeForm();
+  }
+
+  private initAttributeForm(): void {
+    this.attributeForm = this.fb.group({
+      name: [null, [Validators.required]],
+      supportMultipleValues: [false],
+      value: [null],
+      multipleValues: [[]],
+      label: [null]
+    });
+  }
+
+  showCreateAttributeModal(): void {
+    this.isAttributeModalVisible = true;
+  }
+
+  handleAttributeModalCancel(): void {
+    this.isAttributeModalVisible = false;
+    this.attributeForm.reset({
+      supportMultipleValues: false
+    });
+  }
+
+  handleAttributeModalSubmit(): void {
+    if (this.attributeForm.invalid) {
+      // Đánh dấu tất cả các trường là đã chạm vào để hiển thị lỗi
+      Object.values(this.attributeForm.controls).forEach(control => {
+        if (control.invalid) {
+          control.markAsDirty();
+          control.updateValueAndValidity();
+        }
+      });
+      return;
+    }
+
+    this.isAttributeModalLoading = true;
+
+    const formValue = this.attributeForm.value;
+    const isMultiple = formValue.supportMultipleValues;
+    
+    const newAttribute: CustomAttribute = {
+      name: formValue.name,
+      value: isMultiple ? formValue.multipleValues : formValue.value,
+      label: formValue.label,
+      supportMultipleValues: isMultiple
+    };
+
+    this.customAttributes = [...this.customAttributes, newAttribute];
+    
+    setTimeout(() => {
+      this.isAttributeModalLoading = false;
+      this.isAttributeModalVisible = false;
+      this.attributeForm.reset({
+        supportMultipleValues: false
+      });
+    }, 500);
+  }
+
+  deleteAttribute(index: number): void {
+    this.customAttributes = this.customAttributes.filter((_, i) => i !== index);
   }
 
   submitForm(): void {
@@ -81,5 +178,9 @@ export class CreateSimpleProductComponent implements OnInit {
         }
       });
     }
+  }
+
+  isArray(value: any): boolean {
+    return Array.isArray(value);
   }
 }
