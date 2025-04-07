@@ -59,6 +59,8 @@ export class ProductAssetsComponent implements OnChanges {
   selectedAsset: AssetMeta | null = null;
   isMetadataPanelVisible = false;
   isUploading = false;
+
+  isUploadingMultiple = false;
   searchText = '';
   metadataForm: FormGroup;
 
@@ -166,7 +168,7 @@ export class ProductAssetsComponent implements OnChanges {
     const files: FileList = event.target.files;
     if (files.length === 0) return;
     
-    this.isUploading = true;
+    this.isUploadingMultiple = true;
     const uploadPromises: Promise<AssetMeta>[] = [];
     
     // Tạo mảng các promise upload
@@ -227,7 +229,7 @@ export class ProductAssetsComponent implements OnChanges {
     Promise.all(uploadPromises).then(assets => {
       const validAssets = assets.filter(asset => asset !== null) as AssetMeta[];
       this.additionalAssets = [...this.additionalAssets, ...validAssets];
-      this.isUploading = false;
+      this.isUploadingMultiple = false;
       this.emitAssetsUpdated();
       this.message.success(`Đã tải lên ${validAssets.length} ảnh sản phẩm thành công!`);
     });
