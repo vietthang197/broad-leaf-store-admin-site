@@ -13,6 +13,7 @@ import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
+import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
 
 export interface AssetMeta {
   id: string;
@@ -46,6 +47,7 @@ export interface AssetMeta {
     NzSpinModule,
     NzMessageModule,
     NzToolTipModule,
+    NzCheckboxModule,
   ]
 })
 export class ProductAssetsComponent implements OnChanges {
@@ -61,13 +63,13 @@ export class ProductAssetsComponent implements OnChanges {
   metadataForm: FormGroup;
 
   // Cấu hình upload
-  uploadUrl = 'http://localhost:8888/api/assets/upload'; // URL API upload
+  uploadUrl = 'http://localhost:8888/api/assets/upload';
   cdnBaseUrl = 'http://localhost:8888/assets/';
 
   constructor(
     private fb: FormBuilder,
     private message: NzMessageService,
-    // private apiService: ApiService // Giả định có ApiService
+    // private apiService: ApiService
   ) {
     this.metadataForm = this.fb.group({
       title: [''],
@@ -227,7 +229,7 @@ export class ProductAssetsComponent implements OnChanges {
       this.additionalAssets = [...this.additionalAssets, ...validAssets];
       this.isUploading = false;
       this.emitAssetsUpdated();
-      this.message.success(`Đã tải lên ${validAssets.length} tài sản thành công!`);
+      this.message.success(`Đã tải lên ${validAssets.length} ảnh sản phẩm thành công!`);
     });
   }
 
@@ -239,7 +241,7 @@ export class ProductAssetsComponent implements OnChanges {
     setTimeout(() => {
       this.primaryAsset = null;
       this.emitAssetsUpdated();
-      this.message.success('Đã xóa tài sản chính!');
+      this.message.success('Đã xóa ảnh chính của sản phẩm!');
     }, 500);
     
     // Thực tế sẽ gọi API:
@@ -273,7 +275,7 @@ export class ProductAssetsComponent implements OnChanges {
       }
       
       this.emitAssetsUpdated();
-      this.message.success('Đã xóa tài sản!');
+      this.message.success('Đã xóa ảnh sản phẩm!');
     }, 500);
     
     // Thực tế sẽ gọi API:
@@ -405,5 +407,51 @@ export class ProductAssetsComponent implements OnChanges {
   // Kiểm tra xem asset có phải là video không
   isVideo(asset: AssetMeta | null): boolean {
     return asset?.type === 'VIDEO';
+  }
+
+  // Xử lý khi checkbox thay đổi trạng thái
+  onCheckboxChange(checked: boolean, asset: AssetMeta): void {
+    if (checked) {
+      // Nếu checkbox được check, cập nhật selectedAsset
+      this.selectedAsset = asset;
+      
+      // Cập nhật form với dữ liệu của asset được chọn
+      this.metadataForm.patchValue({
+        title: asset.title || '',
+        altText: asset.altText || '',
+        tags: asset.tags || []
+      });
+    } else {
+      // Nếu checkbox được bỏ check, đặt selectedAsset thành null
+      this.selectedAsset = null;
+    }
+    
+    // Đóng panel metadata khi thay đổi lựa chọn
+    this.isMetadataPanelVisible = false;
+  }
+
+  // Xử lý khi checkbox của một item thay đổi
+  onItemChecked(assetId: string, checked: boolean): void {
+    if (checked) {
+      // Nếu checkbox được check, cập nhật selectedAsset
+      this.selectedAsset = this.additionalAssets.find(asset => asset.id === assetId) || null;
+      
+      // Cập nhật form với dữ liệu của asset được chọn
+      if (this.selectedAsset) {
+        this.metadataForm.patchValue({
+          title: this.selectedAsset.title || '',
+          altText: this.selectedAsset.altText || '',
+          tags: this.selectedAsset.tags || []
+        });
+      }
+    } else {
+      // Nếu checkbox được bỏ check, đặt selectedAsset thành null
+      if (this.selectedAsset?.id === assetId) {
+        this.selectedAsset = null;
+      }
+    }
+    
+    // Đóng panel metadata khi thay đổi lựa chọn
+    this.isMetadataPanelVisible = false;
   }
 } 

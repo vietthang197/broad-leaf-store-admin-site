@@ -54,13 +54,6 @@
     <div class="section-header">
       <h4>Additional Assets</h4>
       <div class="header-actions">
-        <nz-input-group [nzSuffix]="suffixIconSearch">
-          <input type="text" nz-input placeholder="Find by name or tags..." [(ngModel)]="searchText" />
-        </nz-input-group>
-        <ng-template #suffixIconSearch>
-          <span nz-icon nzType="search"></span>
-        </ng-template>
-        
         <div class="action-buttons">
           <input
             type="file"
@@ -76,12 +69,6 @@
           </button>
           
           <div class="icon-actions">
-            <button nz-button nzType="text" nz-tooltip nzTooltipTitle="Set as featured">
-              <span nz-icon nzType="star" nzTheme="outline"></span>
-            </button>
-            <button nz-button nzType="text" nz-tooltip nzTooltipTitle="Delete selected" [disabled]="!selectedAsset">
-              <span nz-icon nzType="delete" nzTheme="outline"></span>
-            </button>
             <button 
               nz-button 
               nzType="text" 
@@ -91,15 +78,6 @@
               (click)="showMetadataPanel()"
               [class.active-icon]="isMetadataPanelVisible">
               <span nz-icon nzType="eye" nzTheme="outline"></span>
-            </button>
-            <button nz-button nzType="text" nz-tooltip nzTooltipTitle="Grid view">
-              <span nz-icon nzType="appstore" nzTheme="outline"></span>
-            </button>
-            <button nz-button nzType="text" nz-tooltip nzTooltipTitle="Open in new tab">
-              <span nz-icon nzType="link" nzTheme="outline"></span>
-            </button>
-            <button nz-button nzType="text" nz-tooltip nzTooltipTitle="Download">
-              <span nz-icon nzType="download" nzTheme="outline"></span>
             </button>
           </div>
         </div>
@@ -116,6 +94,9 @@
       class="assets-table">
       <thead>
         <tr>
+          <th [nzWidth]="'60px'">
+            
+          </th>
           <th>Preview</th>
           <th>Title</th>
           <th>Type</th>
@@ -124,10 +105,13 @@
         </tr>
       </thead>
       <tbody>
-        <tr 
-          *ngFor="let asset of assetsTable.data; let i = index" 
-          (click)="selectAsset(asset)"
-          [class.selected-row]="selectedAsset?.id === asset.id">
+        <tr *ngFor="let asset of assetsTable.data; let i = index">
+          <td>
+            <label nz-checkbox 
+                   [ngModel]="selectedAsset?.id === asset.id" 
+                   (ngModelChange)="onCheckboxChange($event, asset)">
+            </label>
+          </td>
           <td>
             <div class="asset-preview">
               <img *ngIf="isImage(asset)" [src]="asset.url" [alt]="asset.altText || 'Asset preview'" />
