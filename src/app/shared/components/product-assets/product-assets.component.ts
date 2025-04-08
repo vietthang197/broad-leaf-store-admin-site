@@ -140,18 +140,18 @@ export class ProductAssetsComponent implements OnChanges {
     
     this.assetService.uploadAsset(formData).subscribe({
       next: (response) => {
-        console.log(response);
-        // this.primaryAsset = {
-        //   id: response.assetId,
-        //   url: `${environment.cdnBaseUrl}` + response.assetId,
-        //   isPrimary: true,
-        //   type: file.type?.startsWith('image/') ? 'IMAGE' : 'VIDEO',
-        //   title: file.name,
-        //   tags: []
-        // };
-        // this.isUploading = false;
-        // this.emitAssetsUpdated();
-        // this.message.success('Tải lên thành công!');
+        const assetData = response.data;
+        this.primaryAsset = {
+          id: assetData.id,
+          url: `${environment.cdnBaseUrl}` + "/api/v1/asset/download/" + assetData.id,
+          isPrimary: true,
+          type: file.type?.startsWith('image/') ? 'IMAGE' : 'VIDEO',
+          title: file.name,
+          tags: []
+        };
+        this.isUploading = false;
+        this.emitAssetsUpdated();
+        this.message.success('Tải lên thành công!');
       },
       error: (error) => {
         this.isUploading = false;
