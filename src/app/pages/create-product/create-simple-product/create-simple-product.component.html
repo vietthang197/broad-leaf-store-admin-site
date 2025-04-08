@@ -3,7 +3,7 @@
     <h2 class="product-title">Loại sản phẩm đơn giản (SIMPLE product)</h2>
   </div>
   <form nz-form [formGroup]="productForm">
-  <nz-card nzTitle="Thông tin cơ bản" class="basic-info-card">
+  <nz-card nzTitle="Thông tin cơ bản" class="basic-info-card" [nzLoading]="true">
     
       <nz-form-item>
         <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired>Tên sản phẩm</nz-form-label>
@@ -72,7 +72,7 @@
     <nz-form-item>
         <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired>Giá nhập kho (Cost)</nz-form-label>
         <nz-form-control [nzSm]="18" [nzXs]="24" nzErrorTip="Vui lòng nhập giá nhập kho!">
-            <nz-input-number formControlName="costAmount" nzMin="0" nzMax="100_000_000_000_000" class="full-width">
+            <nz-input-number formControlName="costAmount" nzMin="0" nzMax="1000000000000" [nzFormatter]="formatterDollar" [nzParser]="parserDollar" class="full-width">
               <nz-select nzInputAddonBefore formControlName="costCurrency" [style.width.px]="120">
                 <nz-option nzLabel="VND" nzValue="VND"></nz-option>
               </nz-select>
@@ -82,7 +82,7 @@
     <nz-form-item>
         <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired>Giá bán mặc định (Regular price)</nz-form-label>
         <nz-form-control [nzSm]="18" [nzXs]="24" nzErrorTip="Vui lòng nhập giá bán mặc định!">
-            <nz-input-number formControlName="regularPriceAmount" nzMin="0" nzMax="100_000_000_000_000" class="full-width">
+            <nz-input-number formControlName="regularPriceAmount" nzMin="0" nzMax="1000000000000" [nzFormatter]="formatterDollar" [nzParser]="parserDollar" class="full-width">
               <nz-select nzInputAddonBefore formControlName="regularPriceCurrency" [style.width.px]="120">
                 <nz-option nzLabel="VND" nzValue="VND"></nz-option>
               </nz-select>
@@ -92,7 +92,7 @@
     <nz-form-item>
         <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired>Giá sale (Sale price)</nz-form-label>
         <nz-form-control [nzSm]="18" [nzXs]="24" nzErrorTip="Vui lòng nhập giá sale!">
-            <nz-input-number formControlName="salePriceAmount" nzMin="0" nzMax="100_000_000_000_000" class="full-width">
+            <nz-input-number formControlName="salePriceAmount" nzMin="0" nzMax="1000000000000" [nzFormatter]="formatterDollar" [nzParser]="parserDollar" class="full-width">
               <nz-select nzInputAddonBefore formControlName="salePriceCurrency" [style.width.px]="120">
                 <nz-option nzLabel="VND" nzValue="VND"></nz-option>
               </nz-select>

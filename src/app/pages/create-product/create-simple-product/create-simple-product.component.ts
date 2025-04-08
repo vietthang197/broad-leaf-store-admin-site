@@ -62,6 +62,8 @@ export class CreateSimpleProductComponent implements OnInit {
   isAttributeModalVisible = false;
   isAttributeModalLoading = false;
   isEditMode = false;
+  formatterDollar = (value: number): string => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  parserDollar = (value: string): number => parseFloat(value?.replace(/\$\s?|(,*)/g, ''));
   
   quillModules = {
     toolbar: [
