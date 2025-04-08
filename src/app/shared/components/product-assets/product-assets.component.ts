@@ -111,33 +111,9 @@ export class ProductAssetsComponent implements OnChanges {
 
   uploadPrimaryAsset(file: File): void {
     this.isUploading = true;
-    
     // Tạo FormData để upload
     const formData = new FormData();
     formData.append('file', file);
-    // formData.append('isPrimary', 'true');
-    
-    // Giả lập API call
-    // setTimeout(() => {
-    //   // Giả định API trả về assetId
-    //   const assetId = 'primary_' + Date.now();
-      
-    //   this.primaryAsset = {
-    //     id: assetId,
-    //     url: `${environment.cdnBaseUrl}` + assetId,
-    //     isPrimary: true,
-    //     type: file.type?.startsWith('image/') ? 'IMAGE' : 'VIDEO',
-    //     title: file.name,
-    //     tags: []
-    //   };
-      
-    //   this.isUploading = false;
-    //   this.emitAssetsUpdated();
-    //   this.message.success('Tải lên thành công!');
-    // }, 1500);
-    
-    // Thực tế sẽ gọi API:
-    
     this.assetService.uploadAsset(formData).subscribe({
       next: (response) => {
         const assetData = response.data;
@@ -184,30 +160,20 @@ export class ProductAssetsComponent implements OnChanges {
       // Tạo promise upload
       uploadPromises.push(
         new Promise<AssetMeta>((resolve) => {
-          // Giả lập API call
-          setTimeout(() => {
-            const assetId = 'additional_' + Date.now() + '_' + i;
-            resolve({
-              id: assetId,
-              url: `${environment.cdnBaseUrl}` + assetId,
-              isPrimary: false,
-              type: file.type.startsWith('image/') ? 'IMAGE' : 'VIDEO',
-              title: file.name,
-              tags: []
-            });
-          }, 1000);
           
           // Thực tế sẽ gọi API:
-          /*
           const formData = new FormData();
           formData.append('file', file);
           formData.append('isPrimary', 'false');
+
           
-          this.apiService.uploadAsset(formData).subscribe({
+          
+          this.assetService.uploadAsset(formData).subscribe({
             next: (response) => {
+              const data = response.data;
               resolve({
-                id: response.assetId,
-                url: this.cdnBaseUrl + response.assetId,
+                id: data.id,
+                url: `${environment.apiUrl}` + "/api/v1/asset/download/" + data.id,
                 isPrimary: false,
                 type: file.type.startsWith('image/') ? 'IMAGE' : 'VIDEO',
                 title: file.name,
@@ -215,10 +181,9 @@ export class ProductAssetsComponent implements OnChanges {
               });
             },
             error: () => {
-              resolve(null); // Xử lý lỗi
+              resolve(null as any); // Xử lý lỗi
             }
           });
-          */
         })
       );
     }

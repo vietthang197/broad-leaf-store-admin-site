@@ -9,40 +9,14 @@
     <h4>Primary Asset</h4>
     <div class="primary-asset-upload">
       <div class="upload-container" [class.has-asset]="primaryAsset">
-        <nz-upload
-          [nzBeforeUpload]="beforeUpload"
-          [nzShowUploadList]="false"
-          nzListType="picture-card"
-          [nzDisabled]="isUploading">
-          <ng-container *ngIf="!primaryAsset; else primaryAssetTemplate">
-            <div class="upload-placeholder">
-              <ng-container *ngIf="!isUploading; else uploadingTemplate">
-                <span nz-icon nzType="plus"></span>
-                <div class="upload-text">Drop file here, or click to upload</div>
-              </ng-container>
-              <ng-template #uploadingTemplate>
-                <nz-spin nzTip="Uploading..."></nz-spin>
-              </ng-template>
-            </div>
-          </ng-container>
-          <ng-template #primaryAssetTemplate>
-            <div class="primary-asset-preview">
-              <img *ngIf="isImage(primaryAsset)" [src]="primaryAsset?.url" [alt]="primaryAsset?.altText || 'Primary asset'" />
-              <div *ngIf="isVideo(primaryAsset)" class="video-placeholder">
-                <span nz-icon nzType="play-circle" nzTheme="outline"></span>
-                <span>Video</span>
-              </div>
-              <button 
-                nz-button 
-                nzType="primary" 
-                nzDanger 
-                nzShape="circle" 
-                class="delete-button"
-                (click)="deletePrimaryAsset(); $event.stopPropagation()">
-                <span nz-icon nzType="delete"></span>
-              </button>
-            </div>
-          </ng-template>
+        <nz-upload class="avatar-uploader"
+          nzListType="picture-card" [nzShowUploadList]="false" [nzBeforeUpload]="beforeUpload">
+          @if (!primaryAsset) {
+          <nz-icon class="upload-icon" [nzType]="isUploading ? 'loading' : 'plus'" />
+          <div class="ant-upload-text">Upload</div>
+          } @else {
+          <img [src]="primaryAsset.url" style="width: 100%" />
+          }
         </nz-upload>
       </div>
     </div>
@@ -53,16 +27,10 @@
     <div class="section-header">
       <h4>Additional Assets</h4>
       <div class="header-actions">
-        
+
         <div class="action-buttons">
-          <input
-            type="file"
-            #fileInput
-            multiple
-            style="display: none"
-            (change)="uploadAdditionalAssets($event)"
-            accept="image/*,video/*"
-          />
+          <input type="file" #fileInput multiple style="display: none" (change)="uploadAdditionalAssets($event)"
+            accept="image/*,video/*" />
           <button nz-button nzType="primary" (click)="fileInput.click()" [nzLoading]="isUploadingMultiple">
             <span nz-icon nzType="upload"></span>
             Upload
@@ -72,13 +40,8 @@
     </div>
 
     <!-- Assets Table -->
-    <nz-table
-      #assetsTable
-      [nzData]="filteredAssets"
-      [nzPageSize]="10"
-      [nzLoading]="isUploadingMultiple"
-      nzShowSizeChanger
-      class="assets-table">
+    <nz-table #assetsTable [nzData]="filteredAssets" [nzPageSize]="10" [nzLoading]="isUploadingMultiple"
+      nzShowSizeChanger class="assets-table">
       <thead>
         <tr>
           <th>Preview</th>
@@ -93,7 +56,7 @@
         <tr *ngFor="let asset of assetsTable.data; let i = index">
           <td>
             <div class="asset-preview">
-              <img *ngIf="isImage(asset)" [src]="asset.url" [alt]="asset.altText || 'Asset preview'" />
+              <img *ngIf="isImage(asset)" class="image-preview" [src]="asset.url" [alt]="asset.altText || 'Asset preview'" />
               <div *ngIf="isVideo(asset)" class="video-preview">
                 <span nz-icon nzType="play-circle" nzTheme="outline"></span>
               </div>
@@ -106,21 +69,13 @@
             <span *ngIf="!asset.tags?.length" class="no-tags">No tags</span>
           </td>
           <td>
-            <button 
-              nz-button 
-              nzType="text" 
-              nz-tooltip 
-              nzTooltipTitle="View details" 
+            <button nz-button nzType="text" nz-tooltip nzTooltipTitle="View details"
               (click)="showMetadataPanelForAsset(asset)">
               <span nz-icon nzType="eye" nzTheme="outline"></span>
             </button>
           </td>
           <td>
-            <button 
-              nz-button 
-              nzType="text" 
-              nzDanger 
-              (click)="deleteAdditionalAsset(i); $event.stopPropagation()">
+            <button nz-button nzType="text" nzDanger (click)="deleteAdditionalAsset(i); $event.stopPropagation()">
               <span nz-icon nzType="delete"></span>
             </button>
           </td>
@@ -130,11 +85,7 @@
   </div>
 
   <!-- Metadata Panel (Draggable) -->
-  <div 
-    *ngIf="isMetadataPanelVisible && selectedAsset" 
-    class="metadata-panel"
-    cdkDrag
-    [cdkDragDisabled]="false"
+  <div *ngIf="isMetadataPanelVisible && selectedAsset" class="metadata-panel" cdkDrag [cdkDragDisabled]="false"
     (cdkDragDropped)="onDragDropped($event)">
     <div class="panel-header" cdkDragHandle>
       <h4>Asset Details</h4>
@@ -142,51 +93,48 @@
         <span nz-icon nzType="close"></span>
       </button>
     </div>
-    
+
     <div class="panel-content">
       <div class="asset-preview-large">
-        <img *ngIf="isImage(selectedAsset)" [src]="selectedAsset.url" [alt]="selectedAsset.altText || 'Asset preview'" />
+        <img *ngIf="isImage(selectedAsset)" [src]="selectedAsset.url"
+          [alt]="selectedAsset.altText || 'Asset preview'" />
         <div *ngIf="isVideo(selectedAsset)" class="video-preview-large">
           <span nz-icon nzType="play-circle" nzTheme="outline"></span>
           <span>Video</span>
         </div>
       </div>
-      
+
       <div class="metadata-form" [formGroup]="metadataForm">
         <div class="form-item">
           <label>Type</label>
           <input nz-input [value]="selectedAsset.type" disabled />
         </div>
-        
+
         <div class="form-item">
           <label>URL</label>
           <input nz-input [value]="selectedAsset.url" disabled />
         </div>
-        
+
         <div class="form-item">
           <label>Alt Text</label>
           <input nz-input formControlName="altText" placeholder="Enter alt text for SEO" />
         </div>
-        
+
         <div class="form-item">
           <label>Title</label>
           <input nz-input formControlName="title" placeholder="Enter asset title" />
         </div>
-        
+
         <div class="form-item">
           <label>Tags</label>
-          <nz-select
-            formControlName="tags"
-            nzMode="tags"
-            nzPlaceHolder="Add tags"
-            class="tag-select">
+          <nz-select formControlName="tags" nzMode="tags" nzPlaceHolder="Add tags" class="tag-select">
           </nz-select>
         </div>
       </div>
-      
+
       <div class="panel-footer">
         <button nz-button nzType="primary" (click)="saveMetadata()">Save</button>
       </div>
     </div>
   </div>
-</div> 
+</div>
