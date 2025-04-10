@@ -3,7 +3,7 @@
     <h2 class="product-title">Loại sản phẩm đơn giản (SIMPLE product)</h2>
   </div>
   <form nz-form [formGroup]="productForm">
-  <nz-card nzTitle="Thông tin cơ bản" class="basic-info-card" [nzLoading]="true">
+  <nz-card nzTitle="Thông tin cơ bản" class="basic-info-card">
     
       <nz-form-item>
         <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired>Tên sản phẩm</nz-form-label>
@@ -31,9 +31,7 @@
         <nz-form-control [nzSm]="18" [nzXs]="24" nzErrorTip="Vui lòng chọn loại sản phẩm!">
           <div class="category-container">
             <nz-select formControlName="category" nzPlaceHolder="Chọn loại sản phẩm" class="category-select">
-              <nz-option nzValue="category1" nzLabel="Category 1"></nz-option>
-              <nz-option nzValue="category2" nzLabel="Category 2"></nz-option>
-              <nz-option nzValue="category3" nzLabel="Category 3"></nz-option>
+              <nz-option *ngFor="let category of categories" [nzValue]="category.id" [nzLabel]="category.name"></nz-option>
             </nz-select>
           </div>
         </nz-form-control>
@@ -173,5 +171,9 @@
       (assetsUpdated)="onAssetsUpdated($event)">
     </app-product-assets>
   </nz-card>
+
+  <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+    <button nz-button nzType="primary" (click)="submitForm()" [nzLoading]="isSubmitting">Tạo mới sản phẩm</button>
+  </div>
 </form>
 </div>

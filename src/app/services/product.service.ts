@@ -10,4 +10,16 @@ export class ProductService {
   private apiUrl = `${environment.apiUrl}/products`;
 
   constructor(private http: HttpClient) { }
+
+  createProduct(productData: any): Observable<any> {
+    return this.http.post<any>(`${environment.apiUrl}/api/v1/products`, productData);
+  }
+  
+  getProduct(id: string): Observable<any> {
+    return this.http.get<any>(`${environment.apiUrl}/api/v1/products/${id}`);
+  }
+  
+  getProducts(params?: any): Observable<any> {
+    return this.http.get<any>(`${environment.apiUrl}/api/v1/products`, { params });
+  }
 } 

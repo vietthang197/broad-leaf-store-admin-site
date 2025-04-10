@@ -20,12 +20,26 @@ import { NzTagModule } from 'ng-zorro-antd/tag';
 import { CommonModule } from '@angular/common';
 import { ProductAssetsComponent } from '../../../shared/components/product-assets/product-assets.component';
 import { AssetMeta } from '../../../shared/components/product-assets/product-assets.component';
+import { CategoryService } from '../../../services/category.service';
+import { ProductService } from '../../../services/product.service';
+import { NzMessageService } from 'ng-zorro-antd/message';
+import { Router } from '@angular/router';
 
 interface CustomAttribute {
   name: string;
   value: string;
   label?: string;
   supportMultipleValues: boolean;
+}
+
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  parentCategoryId: string | null;
+  createdAt: string | null;
+  updatedAt: string | null;
 }
 
 @Component({
@@ -62,6 +76,7 @@ export class CreateSimpleProductComponent implements OnInit {
   isAttributeModalVisible = false;
   isAttributeModalLoading = false;
   isEditMode = false;
+  categories: Category[] = [];
   formatterDollar = (value: number): string => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   parserDollar = (value: string): number => parseFloat(value?.replace(/\$\s?|(,*)/g, ''));
   
@@ -90,8 +105,15 @@ export class CreateSimpleProductComponent implements OnInit {
   }]
 
   productAssets: AssetMeta[] = [];
+  isSubmitting = false;
   
-  constructor(private fb: FormBuilder) {}
+  constructor(
+    private fb: FormBuilder,
+    private categoryService: CategoryService,
+    private productService: ProductService,
+    private message: NzMessageService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.productForm = this.fb.group({
@@ -111,6 +133,9 @@ export class CreateSimpleProductComponent implements OnInit {
     });
 
     this.initAttributeForm();
+    
+    // Load danh sách danh mục
+    this.loadCategories();
     
     // Nếu đang chỉnh sửa sản phẩm, load assets từ API
     if (this.isEditMode) {
@@ -179,10 +204,7 @@ export class CreateSimpleProductComponent implements OnInit {
   }
 
   submitForm(): void {
-    if (this.productForm.valid) {
-      console.log('Form submitted:', this.productForm.value);
-      // Xử lý logic gửi form
-    } else {
+    if (this.productForm.invalid) {
       // Đánh dấu tất cả các trường là đã chạm vào để hiển thị lỗi
       Object.values(this.productForm.controls).forEach(control => {
         if (control.invalid) {
@@ -190,7 +212,60 @@ export class CreateSimpleProductComponent implements OnInit {
           control.updateValueAndValidity({ onlySelf: true });
         }
       });
+      this.message.error('Vui lòng điền đầy đủ thông tin sản phẩm!');
+      return;
     }
+
+    // Kiểm tra primary asset
+    const primaryAsset = this.productAssets.find(asset => asset.isPrimary);
+    if (!primaryAsset) {
+      this.message.error('Vui lòng chọn ít nhất một hình ảnh chính cho sản phẩm!');
+      return;
+    }
+
+    this.isSubmitting = true;
+    
+    // Chuẩn bị dữ liệu sản phẩm
+    const formValue = this.productForm.value;
+    
+    const productData = {
+      productType: formValue.productType,
+      name: formValue.name,
+      sku: formValue.sku,
+      slug: formValue.slug,
+      category: formValue.category,
+      availableOnline: formValue.availableOnline === 'true',
+      description: formValue.description,
+      attributes: this.customAttributes,
+      assets: this.productAssets,
+      cost: {
+        amount: formValue.costAmount,
+        currency: formValue.costCurrency
+      },
+      regularPrice: {
+        amount: formValue.regularPriceAmount,
+        currency: formValue.regularPriceCurrency
+      },
+      salePrice: {
+        amount: formValue.salePriceAmount,
+        currency: formValue.salePriceCurrency
+      }
+    };
+    
+    // Gọi API tạo sản phẩm
+    this.productService.createProduct(productData).subscribe({
+      next: (response) => {
+        this.isSubmitting = false;
+        this.message.success('Tạo sản phẩm thành công!');
+        // Điều hướng đến trang danh sách sản phẩm hoặc trang chi tiết sản phẩm
+        this.router.navigate(['/products']);
+      },
+      error: (error) => {
+        this.isSubmitting = false;
+        this.message.error('Tạo sản phẩm thất bại: ' + (error.error?.message || 'Lỗi không xác định'));
+        console.error('Error creating product:', error);
+      }
+    });
   }
 
   isArray(value: any): boolean {
@@ -239,5 +314,16 @@ export class CreateSimpleProductComponent implements OnInit {
     
     // Có thể lưu tạm thời hoặc gửi lên server
     console.log('Assets updated:', assets);
+  }
+
+  loadCategories(): void {
+    this.categoryService.getCategories().subscribe({
+      next: (data) => {
+        this.categories = data;
+      },
+      error: (err) => {
+        console.error('Error loading categories:', err);
+      }
+    });
   }
 }
