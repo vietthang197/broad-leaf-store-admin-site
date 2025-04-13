@@ -71,6 +71,7 @@ export class ProductAssetsComponent implements OnChanges {
   additionalFileList: NzUploadFile[] = [];
   previewVisible = false;
   previewImage = '';
+  isImagePreview = true; // Mặc định là xem ảnh
 
   // Original properties
   primaryAsset: AssetMeta | null = null;
@@ -134,16 +135,16 @@ export class ProductAssetsComponent implements OnChanges {
   // Preview handler
   handlePreview = (file: NzUploadFile): void => {
     this.previewImage = file.url || file.thumbUrl || '';
+    this.isImagePreview = file.type?.startsWith('image/') || false;
     this.previewVisible = true;
   }
 
   // BeforeUpload handlers
   beforeUploadPrimary = (file: NzUploadFile): boolean | Observable<boolean> => {
     const isImage = file.type?.startsWith('image/');
-    const isVideo = file.type?.startsWith('video/');
     
-    if (!isImage && !isVideo) {
-      this.message.error('Bạn chỉ có thể tải lên file hình ảnh hoặc video!');
+    if (!isImage) {
+      this.message.error('Ảnh chính của sản phẩm chỉ chấp nhận định dạng hình ảnh!');
       return false;
     }
     
@@ -169,7 +170,7 @@ export class ProductAssetsComponent implements OnChanges {
         this.primaryAsset = {
           id: assetData.id,
           url: `${environment.cdnBaseUrl}` + "/api/v1/asset/download/" + assetData.id,
-          type: file.type?.startsWith('image/') ? 'IMAGE' : 'VIDEO',
+          type: 'IMAGE',
           title: file.name,
           tags: [],
           isPrimary: true
@@ -204,10 +205,16 @@ export class ProductAssetsComponent implements OnChanges {
       // Kiểm tra file type và size
       const isImage = file.type.startsWith('image/');
       const isVideo = file.type.startsWith('video/');
-      if (!isImage && !isVideo) continue;
+      if (!isImage && !isVideo) {
+        this.message.warning(`Tệp ${file.name} không được hỗ trợ. Chỉ chấp nhận hình ảnh và video.`);
+        continue;
+      }
       
-      const isLt10M = file.size / 1024 / 1024 < 10;
-      if (!isLt10M) continue;
+      const isLt1G = file.size / 1024 / 1024 < 1024;
+      if (!isLt1G) {
+        this.message.warning(`Tệp ${file.name} vượt quá giới hạn 1GB.`);
+        continue;
+      }
       
       // Tạo promise upload
       uploadPromises.push(
@@ -222,14 +229,15 @@ export class ProductAssetsComponent implements OnChanges {
               const data = response.data;
               resolve({
                 id: data.id,
-                url: `${environment.apiUrl}` + "/api/v1/asset/download/" + data.id,
+                url: `${environment.cdnBaseUrl}` + "/api/v1/asset/download/" + data.id,
                 type: file.type.startsWith('image/') ? 'IMAGE' : 'VIDEO',
                 title: file.name,
                 tags: [],
                 isPrimary: false
               });
             },
-            error: () => {
+            error: (error) => {
+              this.message.error(`Lỗi khi tải lên ${file.name}: ${error.message}`);
               resolve(null as any); // Xử lý lỗi
             }
           });
@@ -241,9 +249,13 @@ export class ProductAssetsComponent implements OnChanges {
     Promise.all(uploadPromises).then(assets => {
       const validAssets = assets.filter(asset => asset !== null) as AssetMeta[];
       this.additionalAssets = [...this.additionalAssets, ...validAssets];
+      this.updateAdditionalFileList();
       this.isUploadingMultiple = false;
       this.emitAssetsUpdated();
-      this.message.success(`Đã tải lên ${validAssets.length} ảnh sản phẩm thành công!`);
+      
+      if (validAssets.length > 0) {
+        this.message.success(`Đã tải lên ${validAssets.length} tệp thành công!`);
+      }
     });
   }
 
@@ -268,9 +280,12 @@ export class ProductAssetsComponent implements OnChanges {
   }
 
   // Event handlers for nz-upload changes
-  onPrimaryFileListChange(fileList: NzUploadFile[]): void {
-    // When file is removed from the list
-    if (fileList.length === 0 && this.primaryAsset) {
+  onPrimaryFileListChange(info: NzUploadChangeParam): void {
+    // Cập nhật primaryFileList để hiển thị
+    this.primaryFileList = [...info.fileList];
+
+    // Khi file bị xóa khỏi danh sách
+    if (info.fileList.length === 0 && this.primaryAsset) {
       this.primaryAsset = null;
       this.emitAssetsUpdated();
     }
@@ -374,5 +389,25 @@ export class ProductAssetsComponent implements OnChanges {
 
   isVideo(asset: AssetMeta | null): boolean {
     return asset?.type === 'VIDEO';
+  }
+
+  // Hiển thị preview ảnh primary
+  previewPrimaryImage(): void {
+    if (this.primaryAsset) {
+      this.previewImage = this.primaryAsset.url;
+      this.isImagePreview = this.primaryAsset.type === 'IMAGE';
+      this.previewVisible = true;
+    }
+  }
+
+  // Xóa primary asset
+  deletePrimaryAsset(): void {
+    if (!this.primaryAsset) return;
+    
+    // Thực hiện xóa ảnh
+    this.primaryAsset = null;
+    this.primaryFileList = [];
+    this.emitAssetsUpdated();
+    this.message.success('Đã xóa ảnh chính của sản phẩm!');
   }
 } 

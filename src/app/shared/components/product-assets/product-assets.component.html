@@ -4,26 +4,43 @@
     <p class="description">Configure the product's primary asset and upload any additional assets.</p>
   </div>
 
-  <!-- Primary Asset Section - Sử dụng Picture Wall -->
+  <!-- Primary Asset Section - Sử dụng Picture Card đơn -->
   <div class="primary-asset-section">
     <h4>Primary Asset <span class="required">*</span></h4>
     <p class="asset-description">Hình ảnh chính của sản phẩm (bắt buộc)</p>
     
-    <nz-upload
-      [nzAction]="uploadUrl"
-      [nzListType]="'picture-card'"
-      [(nzFileList)]="primaryFileList"
-      [nzShowUploadList]="{ showPreviewIcon: true, showRemoveIcon: true }"
-      [nzBeforeUpload]="beforeUploadPrimary"
-      [nzPreview]="handlePreview"
-      (nzChange)="onPrimaryFileListChange($event.fileList)"
-      [nzLimit]="1"
-      [nzMultiple]="false">
-      <div *ngIf="primaryFileList.length < 1">
-        <span nz-icon [nzType]="isUploading ? 'loading' : 'plus'"></span>
-        <div class="ant-upload-text">Upload</div>
+    <div class="primary-upload-container">
+      <!-- Hiển thị nút upload khi chưa có ảnh -->
+      <div *ngIf="!primaryAsset" class="avatar-uploader">
+        <nz-upload
+          [nzAction]="uploadUrl"
+          nzListType="picture-card"
+          [nzShowUploadList]="false"
+          [nzBeforeUpload]="beforeUploadPrimary">
+          <div>
+            <span nz-icon [nzType]="isUploading ? 'loading' : 'plus'"></span>
+            <div class="ant-upload-text">Upload</div>
+          </div>
+        </nz-upload>
       </div>
-    </nz-upload>
+      
+      <!-- Hiển thị ảnh đã upload -->
+      <div *ngIf="primaryAsset" class="primary-image-container">
+        <div class="image-wrapper">
+          <!-- Chỉ hiển thị ảnh vì primary asset chỉ chấp nhận IMAGE -->
+          <img [src]="primaryAsset.url" [alt]="primaryAsset.title || 'Primary image'" />
+          
+          <div class="image-actions">
+            <button nz-button nzType="primary" nzShape="circle" nzSize="small" (click)="previewPrimaryImage()" nz-tooltip nzTooltipTitle="Xem">
+              <span nz-icon nzType="eye"></span>
+            </button>
+            <button nz-button nzType="primary" nzDanger nzShape="circle" nzSize="small" (click)="deletePrimaryAsset()" nz-tooltip nzTooltipTitle="Xóa">
+              <span nz-icon nzType="delete"></span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Additional Assets Section - Giữ nguyên dạng table cũ -->
@@ -58,7 +75,7 @@
       <tbody>
         <tr *ngFor="let asset of assetsTable.data; let i = index">
           <td>
-            <div class="asset-preview">
+            <div class="asset-preview" (click)="previewImage = asset.url; isImagePreview = asset.type === 'IMAGE'; previewVisible = true" [ngStyle]="{'cursor': 'pointer'}">
               <img *ngIf="isImage(asset)" class="image-preview" [src]="asset.url" [alt]="asset.altText || 'Asset preview'" />
               <div *ngIf="isVideo(asset)" class="video-preview">
                 <span nz-icon nzType="play-circle" nzTheme="outline"></span>
@@ -94,7 +111,12 @@
     [nzFooter]="null"
     (nzOnCancel)="previewVisible = false">
     <ng-template #modalContent>
-      <img [src]="previewImage" [ngStyle]="{ width: '100%' }" />
+      <!-- Hiển thị hình ảnh nếu là IMAGE -->
+      <img *ngIf="isImagePreview" [src]="previewImage" [ngStyle]="{ width: '100%' }" />
+      
+      <!-- Hiển thị video nếu là VIDEO -->
+      <video *ngIf="!isImagePreview" [src]="previewImage" controls controlsList="nodownload" 
+        preload="metadata" [ngStyle]="{ width: '100%', maxHeight: '70vh' }"></video>
     </ng-template>
   </nz-modal>
 
@@ -109,7 +131,7 @@
     </div>
 
     <div class="panel-content">
-      <div class="asset-preview-large">
+      <div class="asset-preview-large" (click)="previewImage = selectedAsset.url; isImagePreview = selectedAsset.type === 'IMAGE'; previewVisible = true" [ngStyle]="{'cursor': 'pointer'}">
         <img *ngIf="isImage(selectedAsset)" [src]="selectedAsset.url"
           [alt]="selectedAsset.altText || 'Asset preview'" />
         <div *ngIf="isVideo(selectedAsset)" class="video-preview-large">
@@ -179,6 +201,60 @@
     margin-bottom: 24px;
   }
   
+  /* Styles cho primary asset */
+  .primary-upload-container {
+    width: 100%;
+    margin-bottom: 16px;
+  }
+  
+  :host ::ng-deep .ant-upload.ant-upload-select-picture-card {
+    width: 128px;
+    height: 128px;
+  }
+  
+  .primary-image-container {
+    width: 100%;
+    max-width: 128px;
+  }
+  
+  .image-wrapper {
+    width: 128px;
+    height: 128px;
+    border: 1px dashed #d9d9d9;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    padding: 8px;
+    background-color: #fafafa;
+    transition: all 0.3s;
+  }
+  
+  .image-wrapper:hover {
+    border-color: #1890ff;
+  }
+  
+  .image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+  
+  .image-actions {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    display: flex;
+    gap: 8px;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  
+  .image-wrapper:hover .image-actions {
+    opacity: 1;
+  }
+  
+  /* CSS cũ */
   .asset-preview {
     width: 60px;
     height: 60px;
