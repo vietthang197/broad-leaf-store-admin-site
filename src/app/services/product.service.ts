@@ -22,4 +22,8 @@ export class ProductService {
   getProducts(params?: any): Observable<any> {
     return this.http.get<any>(`${environment.apiUrl}/api/v1/products`, { params });
   }
+  
+  updateProduct(id: string, productData: any): Observable<any> {
+    return this.http.put<any>(`${environment.apiUrl}/api/v1/products/${id}`, productData);
+  }
 } 

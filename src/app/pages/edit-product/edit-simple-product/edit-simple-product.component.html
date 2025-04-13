@@ -1,0 +1,181 @@
+<div class="product-form-container">
+  <div class="product-header">
+    <h2 class="product-title">Cập nhật sản phẩm đơn giản (SIMPLE product)</h2>
+  </div>
+
+  <nz-spin [nzSpinning]="isLoading">
+    <form nz-form [formGroup]="productForm">
+      <nz-card nzTitle="Thông tin cơ bản" class="basic-info-card">
+        <nz-form-item>
+          <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired>Tên sản phẩm</nz-form-label>
+          <nz-form-control [nzSm]="18" [nzXs]="24" nzErrorTip="Vui lòng nhập tên sản phẩm!">
+              <input nz-input formControlName="name" placeholder="Product name" class="full-width" />
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired>SKU (Mã sản phẩm)</nz-form-label>
+          <nz-form-control [nzSm]="18" [nzXs]="24" nzErrorTip="Vui lòng nhập SKU!">
+              <input nz-input formControlName="sku" placeholder="Product SKU" class="full-width" />
+          </nz-form-control>
+        </nz-form-item>
+        <!-- Uri -->
+        <nz-form-item>
+          <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired>Slug (Đường dẫn sản phẩm SEO)</nz-form-label>
+          <nz-form-control [nzSm]="18" [nzXs]="24" nzErrorTip="Vui lòng nhập Slug!">
+            <input nz-input formControlName="slug" placeholder="Slug" class="full-width" />
+          </nz-form-control>
+        </nz-form-item>
+
+        <!-- Danh mục chính -->
+        <nz-form-item>
+          <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired>Loại sản phẩm</nz-form-label>
+          <nz-form-control [nzSm]="18" [nzXs]="24" nzErrorTip="Vui lòng chọn loại sản phẩm!">
+            <div class="category-container">
+              <nz-select formControlName="category" nzPlaceHolder="Chọn loại sản phẩm" class="category-select">
+                <nz-option *ngFor="let category of categories" [nzValue]="category.id" [nzLabel]="category.name"></nz-option>
+              </nz-select>
+            </div>
+          </nz-form-control>
+        </nz-form-item>
+
+        <!-- Trạng thái hoạt động -->
+        <nz-form-item>
+          <nz-form-label [nzSm]="6" [nzXs]="24">
+            Sản phẩm cho phép mở bán online?
+            <i nz-tooltip nzTooltipTitle="Determines if this product is available for sale" nz-icon nzType="question-circle"></i>
+          </nz-form-label>
+          <nz-form-control [nzSm]="18" [nzXs]="24">
+            <nz-radio-group formControlName="availableOnline" nzButtonStyle="solid">
+              <label nz-radio-button nzValue="true" class="active-yes">Có</label>
+              <label nz-radio-button nzValue="false" class="active-no">Không</label>
+            </nz-radio-group>
+          </nz-form-control>
+        </nz-form-item>
+      </nz-card>
+
+      <nz-card nzTitle="Mô tả sản phẩm" class="basic-info-card">
+        <nz-form-item>
+          <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired>Mô tả sản phẩm</nz-form-label>
+          <nz-form-control [nzSm]="18" [nzXs]="24" nzErrorTip="Vui lòng nhập mô tả sản phẩm!">
+            <quill-editor
+              formControlName="description"
+              [styles]="{height: '200px'}"
+              [modules]="quillModules"
+              placeholder="Nhập mô tả chi tiết về sản phẩm">
+            </quill-editor>
+          </nz-form-control>
+        </nz-form-item>
+      </nz-card>
+      <nz-card nzTitle="Giá sản phẩm" class="basic-info-card">
+        <nz-form-item>
+            <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired>Giá nhập kho (Cost)</nz-form-label>
+            <nz-form-control [nzSm]="18" [nzXs]="24" nzErrorTip="Vui lòng nhập giá nhập kho!">
+                <nz-input-number formControlName="costAmount" nzMin="0" nzMax="1000000000000" [nzFormatter]="formatterDollar" [nzParser]="parserDollar" class="full-width">
+                  <nz-select nzInputAddonBefore formControlName="costCurrency" [style.width.px]="120">
+                    <nz-option nzLabel="VND" nzValue="VND"></nz-option>
+                  </nz-select>
+                </nz-input-number>
+            </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+            <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired>Giá bán mặc định (Regular price)</nz-form-label>
+            <nz-form-control [nzSm]="18" [nzXs]="24" nzErrorTip="Vui lòng nhập giá bán mặc định!">
+                <nz-input-number formControlName="regularPriceAmount" nzMin="0" nzMax="1000000000000" [nzFormatter]="formatterDollar" [nzParser]="parserDollar" class="full-width">
+                  <nz-select nzInputAddonBefore formControlName="regularPriceCurrency" [style.width.px]="120">
+                    <nz-option nzLabel="VND" nzValue="VND"></nz-option>
+                  </nz-select>
+                </nz-input-number>
+            </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+            <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired>Giá sale (Sale price)</nz-form-label>
+            <nz-form-control [nzSm]="18" [nzXs]="24" nzErrorTip="Vui lòng nhập giá sale!">
+                <nz-input-number formControlName="salePriceAmount" nzMin="0" nzMax="1000000000000" [nzFormatter]="formatterDollar" [nzParser]="parserDollar" class="full-width">
+                  <nz-select nzInputAddonBefore formControlName="salePriceCurrency" [style.width.px]="120">
+                    <nz-option nzLabel="VND" nzValue="VND"></nz-option>
+                  </nz-select>
+                </nz-input-number>
+            </nz-form-control>
+        </nz-form-item>
+      </nz-card>
+      <nz-card nzTitle="Thuộc tính sản phẩm" class="basic-info-card" [nzExtra]="extraTemplate">
+        <ng-template #extraTemplate>
+          <button nz-button nzType="primary" (click)="showCreateAttributeModal()">Create Attribute</button>
+        </ng-template>
+        
+        <nz-table #attributesTable [nzData]="customAttributes" [nzPageSize]="5">
+          <thead>
+            <tr>
+              <th>Name (Key)</th>
+              <th>Value</th>
+              <th>Label</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let attr of attributesTable.data; let i = index">
+              <td>{{ attr.name }}</td>
+              <td>
+                <ng-container *ngIf="!attr.supportMultipleValues">{{ attr.value }}</ng-container>
+                <ng-container *ngIf="attr.supportMultipleValues && isArray(attr.value)">
+                    {{attr.value}}
+                </ng-container>
+              </td>
+              <td>{{ attr.label }}</td>
+              <td>
+                <button nz-button nzType="link" nzDanger (click)="deleteAttribute(i)">
+                  <span nz-icon nzType="delete"></span>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </nz-table>
+      </nz-card>
+
+      <!-- Modal Create Attribute -->
+      <nz-modal
+        [(nzVisible)]="isAttributeModalVisible"
+        nzTitle="Create Product Attribute"
+        (nzOnCancel)="handleAttributeModalCancel()"
+        (nzOnOk)="handleAttributeModalSubmit()"
+        [nzOkLoading]="isAttributeModalLoading">
+        <ng-container *nzModalContent>
+          <form nz-form [formGroup]="attributeForm">
+            <nz-form-item>
+              <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired>Name (Key)</nz-form-label>
+              <nz-form-control [nzSm]="18" [nzXs]="24" nzErrorTip="Vui lòng nhập tên thuộc tính!">
+                <input nz-input formControlName="name" placeholder="Attribute name" />
+              </nz-form-control>
+            </nz-form-item>
+            
+            <nz-form-item>
+              <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired>Value</nz-form-label>
+              <nz-form-control [nzSm]="18" [nzXs]="24" nzErrorTip="Vui lòng nhập giá trị!">
+                <input nz-input formControlName="value" placeholder="Attribute value" />
+              </nz-form-control>
+            </nz-form-item>
+            
+            <nz-form-item>
+              <nz-form-label [nzSm]="6" [nzXs]="24">Label</nz-form-label>
+              <nz-form-control [nzSm]="18" [nzXs]="24">
+                <input nz-input formControlName="label" placeholder="Attribute label (optional)" />
+              </nz-form-control>
+            </nz-form-item>
+          </form>
+        </ng-container>
+      </nz-modal>
+
+      <nz-card nzTitle="Product Assets" class="basic-info-card">
+        <app-product-assets
+          [initialPrimaryAsset]="productPrimaryAsset"
+          [initialAdditionalAssets]="productAdditionalAssets"
+          (assetsUpdated)="onAssetsUpdated($event)">
+        </app-product-assets>
+      </nz-card>
+
+      <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+        <button nz-button nzType="primary" (click)="submitForm()" [nzLoading]="isSubmitting">Cập nhật sản phẩm</button>
+      </div>
+    </form>
+  </nz-spin>
+</div> 
