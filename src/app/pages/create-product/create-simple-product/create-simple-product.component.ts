@@ -19,7 +19,7 @@ import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { CommonModule } from '@angular/common';
 import { ProductAssetsComponent } from '../../../shared/components/product-assets/product-assets.component';
-import { AssetMeta } from '../../../shared/components/product-assets/product-assets.component';
+import { AssetMeta, ProductAssets } from '../../../shared/components/product-assets/product-assets.component';
 import { CategoryService } from '../../../services/category.service';
 import { ProductService } from '../../../services/product.service';
 import { NzMessageService } from 'ng-zorro-antd/message';
@@ -104,7 +104,8 @@ export class CreateSimpleProductComponent implements OnInit {
     value: 'VND'
   }]
 
-  productAssets: AssetMeta[] = [];
+  productPrimaryAsset: AssetMeta | null = null;
+  productAdditionalAssets: AssetMeta[] = [];
   isSubmitting = false;
   
   constructor(
@@ -217,8 +218,7 @@ export class CreateSimpleProductComponent implements OnInit {
     }
 
     // Kiểm tra primary asset
-    const primaryAsset = this.productAssets.find(asset => asset.isPrimary);
-    if (!primaryAsset) {
+    if (!this.productPrimaryAsset) {
       this.message.error('Vui lòng chọn ít nhất một hình ảnh chính cho sản phẩm!');
       return;
     }
@@ -227,6 +227,18 @@ export class CreateSimpleProductComponent implements OnInit {
     
     // Chuẩn bị dữ liệu sản phẩm
     const formValue = this.productForm.value;
+    
+    // Đảm bảo primary asset có thuộc tính isPrimary = true
+    const primaryAsset = {
+      ...this.productPrimaryAsset,
+      isPrimary: true
+    };
+    
+    // Đảm bảo additional assets có thuộc tính isPrimary = false
+    const additionalAssets = this.productAdditionalAssets.map(asset => ({
+      ...asset,
+      isPrimary: false
+    }));
     
     const productData = {
       productType: formValue.productType,
@@ -237,7 +249,8 @@ export class CreateSimpleProductComponent implements OnInit {
       availableOnline: formValue.availableOnline === 'true',
       description: formValue.description,
       attributes: this.customAttributes,
-      assets: this.productAssets,
+      primaryAsset: primaryAsset,
+      additionalAssets: additionalAssets,
       cost: {
         amount: formValue.costAmount,
         currency: formValue.costCurrency
@@ -276,43 +289,34 @@ export class CreateSimpleProductComponent implements OnInit {
     // Giả lập API call để lấy assets của sản phẩm
     // Trong thực tế, bạn sẽ gọi API service
     setTimeout(() => {
-      this.productAssets = [
-        {
-          id: 'primary_123',
-          url: 'http://localhost:8888/assets/primary_123',
-          isPrimary: true,
-          type: 'IMAGE',
-          title: 'Primary Product Image',
-          altText: 'Product main view',
-          tags: ['main', 'featured']
-        },
+      this.productPrimaryAsset = {
+        id: 'primary_123',
+        url: 'http://localhost:8888/assets/primary_123',
+        type: 'IMAGE',
+        title: 'Primary Product Image',
+        altText: 'Product main view',
+        tags: ['main', 'featured'],
+        isPrimary: true
+      };
+      this.productAdditionalAssets = [
         {
           id: 'additional_456',
           url: 'http://localhost:8888/assets/additional_456',
-          isPrimary: false,
           type: 'IMAGE',
           title: 'Side view',
           altText: 'Product side view',
-          tags: ['side']
+          tags: ['side'],
+          isPrimary: false
         }
         // Thêm các assets khác nếu cần
       ];
     }, 1000);
   }
   
-  onAssetsUpdated(assets: AssetMeta[]): void {
-    this.productAssets = assets;
+  onAssetsUpdated(assets: ProductAssets): void {
+    this.productPrimaryAsset = assets.primaryAsset;
+    this.productAdditionalAssets = assets.additionalAssets;
     
-    // Cập nhật form value nếu cần
-    const primaryAsset = assets.find(a => a.isPrimary);
-    if (primaryAsset) {
-      // Ví dụ: cập nhật một trường trong form chính
-      // this.productForm.patchValue({
-      //   primaryImageUrl: primaryAsset.url
-      // });
-    }
-    
-    // Có thể lưu tạm thời hoặc gửi lên server
     console.log('Assets updated:', assets);
   }
 

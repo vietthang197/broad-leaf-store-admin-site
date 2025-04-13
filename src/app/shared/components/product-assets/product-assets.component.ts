@@ -14,18 +14,25 @@ import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
+import { NzModalModule } from 'ng-zorro-antd/modal';
 import { environment } from '../../../../environments/environment';
 import { AssetService } from '../../../services/asset.service';
+import { Observable } from 'rxjs';
 
 export interface AssetMeta {
   id: string;
   url: string;
-  isPrimary: boolean;
   type: 'IMAGE' | 'VIDEO';
   title?: string;
   altText?: string;
   tags?: string[];
   file?: File;
+  isPrimary?: boolean;
+}
+
+export interface ProductAssets {
+  primaryAsset: AssetMeta | null;
+  additionalAssets: AssetMeta[];
 }
 
 @Component({
@@ -50,18 +57,27 @@ export interface AssetMeta {
     NzMessageModule,
     NzToolTipModule,
     NzCheckboxModule,
+    NzModalModule,
   ]
 })
 export class ProductAssetsComponent implements OnChanges {
-  @Input() initialAssets: AssetMeta[] = [];
-  @Output() assetsUpdated = new EventEmitter<AssetMeta[]>();
+  @Input() initialPrimaryAsset: AssetMeta | null = null;
+  @Input() initialAdditionalAssets: AssetMeta[] = [];
+  @Output() assetsUpdated = new EventEmitter<ProductAssets>();
 
+  // Properties for picture wall
+  uploadUrl = ''; // Chỉ để đáp ứng yêu cầu của ng-zorro, thực tế upload sẽ xử lý qua beforeUpload
+  primaryFileList: NzUploadFile[] = [];
+  additionalFileList: NzUploadFile[] = [];
+  previewVisible = false;
+  previewImage = '';
+
+  // Original properties
   primaryAsset: AssetMeta | null = null;
   additionalAssets: AssetMeta[] = [];
   selectedAsset: AssetMeta | null = null;
   isMetadataPanelVisible = false;
   isUploading = false;
-
   isUploadingMultiple = false;
   searchText = '';
   metadataForm: FormGroup;
@@ -79,18 +95,50 @@ export class ProductAssetsComponent implements OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['initialAssets'] && this.initialAssets) {
-      this.processInitialAssets();
+    if (changes['initialPrimaryAsset'] && this.initialPrimaryAsset) {
+      this.primaryAsset = this.initialPrimaryAsset;
+      this.updatePrimaryFileList();
+    }
+    
+    if (changes['initialAdditionalAssets'] && this.initialAdditionalAssets) {
+      this.additionalAssets = [...this.initialAdditionalAssets];
+      this.updateAdditionalFileList();
     }
   }
 
-  processInitialAssets(): void {
-    this.primaryAsset = this.initialAssets.find(asset => asset.isPrimary) || null;
-    this.additionalAssets = this.initialAssets.filter(asset => !asset.isPrimary);
+  // Convert AssetMeta to NzUploadFile
+  private assetMetaToNzUploadFile(asset: AssetMeta): NzUploadFile {
+    return {
+      uid: asset.id,
+      name: asset.title || 'image',
+      status: 'done',
+      url: asset.url,
+      thumbUrl: asset.url,
+      response: { data: { id: asset.id } }
+    };
   }
 
-  // Xử lý upload primary asset
-  beforeUpload = (file: NzUploadFile): boolean => {
+  // Update file lists for display
+  private updatePrimaryFileList(): void {
+    if (this.primaryAsset) {
+      this.primaryFileList = [this.assetMetaToNzUploadFile(this.primaryAsset)];
+    } else {
+      this.primaryFileList = [];
+    }
+  }
+
+  private updateAdditionalFileList(): void {
+    this.additionalFileList = this.additionalAssets.map(asset => this.assetMetaToNzUploadFile(asset));
+  }
+
+  // Preview handler
+  handlePreview = (file: NzUploadFile): void => {
+    this.previewImage = file.url || file.thumbUrl || '';
+    this.previewVisible = true;
+  }
+
+  // BeforeUpload handlers
+  beforeUploadPrimary = (file: NzUploadFile): boolean | Observable<boolean> => {
     const isImage = file.type?.startsWith('image/');
     const isVideo = file.type?.startsWith('video/');
     
@@ -104,11 +152,12 @@ export class ProductAssetsComponent implements OnChanges {
       this.message.error('File phải nhỏ hơn 10MB!');
       return false;
     }
-    // Xử lý upload thủ công thay vì để nz-upload tự xử lý
-    this.uploadPrimaryAsset(file as any);
-    return false; // Ngăn nz-upload tự động upload
-  };
 
+    this.uploadPrimaryAsset(file as any);
+    return false; // Prevent default upload
+  }
+
+  // Upload handlers
   uploadPrimaryAsset(file: File): void {
     this.isUploading = true;
     // Tạo FormData để upload
@@ -120,11 +169,15 @@ export class ProductAssetsComponent implements OnChanges {
         this.primaryAsset = {
           id: assetData.id,
           url: `${environment.cdnBaseUrl}` + "/api/v1/asset/download/" + assetData.id,
-          isPrimary: true,
           type: file.type?.startsWith('image/') ? 'IMAGE' : 'VIDEO',
           title: file.name,
-          tags: []
+          tags: [],
+          isPrimary: true
         };
+        
+        // Update the file list for UI
+        this.updatePrimaryFileList();
+        
         this.isUploading = false;
         this.emitAssetsUpdated();
         this.message.success('Tải lên thành công!');
@@ -134,7 +187,6 @@ export class ProductAssetsComponent implements OnChanges {
         this.message.error('Tải lên thất bại: ' + error.message);
       }
     });
-    
   }
 
   // Xử lý upload additional assets
@@ -164,9 +216,6 @@ export class ProductAssetsComponent implements OnChanges {
           // Thực tế sẽ gọi API:
           const formData = new FormData();
           formData.append('file', file);
-          formData.append('isPrimary', 'false');
-
-          
           
           this.assetService.uploadAsset(formData).subscribe({
             next: (response) => {
@@ -174,10 +223,10 @@ export class ProductAssetsComponent implements OnChanges {
               resolve({
                 id: data.id,
                 url: `${environment.apiUrl}` + "/api/v1/asset/download/" + data.id,
-                isPrimary: false,
                 type: file.type.startsWith('image/') ? 'IMAGE' : 'VIDEO',
                 title: file.name,
-                tags: []
+                tags: [],
+                isPrimary: false
               });
             },
             error: () => {
@@ -198,32 +247,6 @@ export class ProductAssetsComponent implements OnChanges {
     });
   }
 
-  // Xóa primary asset
-  deletePrimaryAsset(): void {
-    if (!this.primaryAsset) return;
-    
-    // Giả lập API call xóa
-    setTimeout(() => {
-      this.primaryAsset = null;
-      this.emitAssetsUpdated();
-      this.message.success('Đã xóa ảnh chính của sản phẩm!');
-    }, 500);
-    
-    // Thực tế sẽ gọi API:
-    /*
-    this.apiService.deleteAsset(this.primaryAsset.id).subscribe({
-      next: () => {
-        this.primaryAsset = null;
-        this.emitAssetsUpdated();
-        this.message.success('Đã xóa tài sản chính!');
-      },
-      error: (error) => {
-        this.message.error('Xóa thất bại: ' + error.message);
-      }
-    });
-    */
-  }
-
   // Xóa additional asset
   deleteAdditionalAsset(index: number): void {
     const assetToDelete = this.additionalAssets[index];
@@ -242,34 +265,17 @@ export class ProductAssetsComponent implements OnChanges {
       this.emitAssetsUpdated();
       this.message.success('Đã xóa ảnh sản phẩm!');
     }, 500);
-    
-    // Thực tế sẽ gọi API:
-    /*
-    this.apiService.deleteAsset(assetToDelete.id).subscribe({
-      next: () => {
-        this.additionalAssets.splice(index, 1);
-        this.additionalAssets = [...this.additionalAssets];
-        
-        if (this.selectedAsset && this.selectedAsset.id === assetToDelete.id) {
-          this.selectedAsset = null;
-          this.isMetadataPanelVisible = false;
-        }
-        
-        this.emitAssetsUpdated();
-        this.message.success('Đã xóa tài sản!');
-      },
-      error: (error) => {
-        this.message.error('Xóa thất bại: ' + error.message);
-      }
-    });
-    */
   }
 
-  // Xóa nhiều assets đã chọn
-  deleteSelectedAssets(): void {
-    // Thực hiện khi có chức năng chọn nhiều
+  // Event handlers for nz-upload changes
+  onPrimaryFileListChange(fileList: NzUploadFile[]): void {
+    // When file is removed from the list
+    if (fileList.length === 0 && this.primaryAsset) {
+      this.primaryAsset = null;
+      this.emitAssetsUpdated();
+    }
   }
-
+  
   // Chọn asset để xem/chỉnh sửa metadata
   selectAsset(asset: AssetMeta): void {
     this.selectedAsset = asset;
@@ -321,103 +327,11 @@ export class ProductAssetsComponent implements OnChanges {
       this.emitAssetsUpdated();
       this.message.success('Đã cập nhật metadata!');
     }, 500);
-    
-    // Thực tế sẽ gọi API:
-    /*
-    this.apiService.updateAssetMetadata(updatedAsset.id, {
-      title: formValue.title,
-      altText: formValue.altText,
-      tags: formValue.tags
-    }).subscribe({
-      next: () => {
-        this.emitAssetsUpdated();
-        this.message.success('Đã cập nhật metadata!');
-      },
-      error: (error) => {
-        this.message.error('Cập nhật thất bại: ' + error.message);
-      }
-    });
-    */
   }
 
   // Xử lý kéo thả panel metadata
   onDragDropped(event: CdkDragDrop<any>): void {
     // Xử lý vị trí mới của panel nếu cần
-  }
-
-  // Lọc assets theo searchText
-  get filteredAssets(): AssetMeta[] {
-    if (!this.searchText) return this.additionalAssets;
-    
-    return this.additionalAssets.filter(asset => 
-      asset.title?.toLowerCase().includes(this.searchText.toLowerCase()) ||
-      asset.tags?.some(tag => tag.toLowerCase().includes(this.searchText.toLowerCase()))
-    );
-  }
-
-  // Phát ra sự kiện cập nhật assets
-  emitAssetsUpdated(): void {
-    const allAssets = [
-      ...(this.primaryAsset ? [this.primaryAsset] : []),
-      ...this.additionalAssets
-    ];
-    this.assetsUpdated.emit(allAssets);
-  }
-
-  // Kiểm tra xem asset có phải là hình ảnh không
-  isImage(asset: AssetMeta | null): boolean {
-    return asset?.type === 'IMAGE';
-  }
-
-  // Kiểm tra xem asset có phải là video không
-  isVideo(asset: AssetMeta | null): boolean {
-    return asset?.type === 'VIDEO';
-  }
-
-  // Xử lý khi checkbox thay đổi trạng thái
-  onCheckboxChange(checked: boolean, asset: AssetMeta): void {
-    if (checked) {
-      // Nếu checkbox được check, cập nhật selectedAsset
-      this.selectedAsset = asset;
-      
-      // Cập nhật form với dữ liệu của asset được chọn
-      this.metadataForm.patchValue({
-        title: asset.title || '',
-        altText: asset.altText || '',
-        tags: asset.tags || []
-      });
-    } else {
-      // Nếu checkbox được bỏ check, đặt selectedAsset thành null
-      this.selectedAsset = null;
-    }
-    
-    // Đóng panel metadata khi thay đổi lựa chọn
-    this.isMetadataPanelVisible = false;
-  }
-
-  // Xử lý khi checkbox của một item thay đổi
-  onItemChecked(assetId: string, checked: boolean): void {
-    if (checked) {
-      // Nếu checkbox được check, cập nhật selectedAsset
-      this.selectedAsset = this.additionalAssets.find(asset => asset.id === assetId) || null;
-      
-      // Cập nhật form với dữ liệu của asset được chọn
-      if (this.selectedAsset) {
-        this.metadataForm.patchValue({
-          title: this.selectedAsset.title || '',
-          altText: this.selectedAsset.altText || '',
-          tags: this.selectedAsset.tags || []
-        });
-      }
-    } else {
-      // Nếu checkbox được bỏ check, đặt selectedAsset thành null
-      if (this.selectedAsset?.id === assetId) {
-        this.selectedAsset = null;
-      }
-    }
-    
-    // Đóng panel metadata khi thay đổi lựa chọn
-    this.isMetadataPanelVisible = false;
   }
 
   // Phương thức mới để hiển thị panel metadata cho asset cụ thể
@@ -432,5 +346,33 @@ export class ProductAssetsComponent implements OnChanges {
     
     // Hiển thị panel
     this.isMetadataPanelVisible = true;
+  }
+
+  // Lọc assets theo searchText
+  get filteredAssets(): AssetMeta[] {
+    if (!this.searchText) return this.additionalAssets;
+    
+    return this.additionalAssets.filter(asset => 
+      asset.title?.toLowerCase().includes(this.searchText.toLowerCase()) ||
+      asset.tags?.some(tag => tag.toLowerCase().includes(this.searchText.toLowerCase()))
+    );
+  }
+
+  // Emit assets updated
+  emitAssetsUpdated(): void {
+    const assets: ProductAssets = {
+      primaryAsset: this.primaryAsset,
+      additionalAssets: this.additionalAssets
+    };
+    this.assetsUpdated.emit(assets);
+  }
+
+  // Helper methods
+  isImage(asset: AssetMeta | null): boolean {
+    return asset?.type === 'IMAGE';
+  }
+
+  isVideo(asset: AssetMeta | null): boolean {
+    return asset?.type === 'VIDEO';
   }
 } 

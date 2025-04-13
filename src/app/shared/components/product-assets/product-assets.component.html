@@ -4,30 +4,33 @@
     <p class="description">Configure the product's primary asset and upload any additional assets.</p>
   </div>
 
-  <!-- Primary Asset Section -->
+  <!-- Primary Asset Section - Sử dụng Picture Wall -->
   <div class="primary-asset-section">
-    <h4>Primary Asset</h4>
-    <div class="primary-asset-upload">
-      <div class="upload-container" [class.has-asset]="primaryAsset">
-        <nz-upload class="avatar-uploader"
-          nzListType="picture-card" [nzShowUploadList]="false" [nzBeforeUpload]="beforeUpload">
-          @if (!primaryAsset) {
-          <nz-icon class="upload-icon" [nzType]="isUploading ? 'loading' : 'plus'" />
-          <div class="ant-upload-text">Upload</div>
-          } @else {
-          <img [src]="primaryAsset.url" style="width: 100%" />
-          }
-        </nz-upload>
+    <h4>Primary Asset <span class="required">*</span></h4>
+    <p class="asset-description">Hình ảnh chính của sản phẩm (bắt buộc)</p>
+    
+    <nz-upload
+      [nzAction]="uploadUrl"
+      [nzListType]="'picture-card'"
+      [(nzFileList)]="primaryFileList"
+      [nzShowUploadList]="{ showPreviewIcon: true, showRemoveIcon: true }"
+      [nzBeforeUpload]="beforeUploadPrimary"
+      [nzPreview]="handlePreview"
+      (nzChange)="onPrimaryFileListChange($event.fileList)"
+      [nzLimit]="1"
+      [nzMultiple]="false">
+      <div *ngIf="primaryFileList.length < 1">
+        <span nz-icon [nzType]="isUploading ? 'loading' : 'plus'"></span>
+        <div class="ant-upload-text">Upload</div>
       </div>
-    </div>
+    </nz-upload>
   </div>
 
-  <!-- Additional Assets Section -->
+  <!-- Additional Assets Section - Giữ nguyên dạng table cũ -->
   <div class="additional-assets-section">
     <div class="section-header">
       <h4>Additional Assets</h4>
       <div class="header-actions">
-
         <div class="action-buttons">
           <input type="file" #fileInput multiple style="display: none" (change)="uploadAdditionalAssets($event)"
             accept="image/*,video/*" />
@@ -38,7 +41,7 @@
         </div>
       </div>
     </div>
-
+    
     <!-- Assets Table -->
     <nz-table #assetsTable [nzData]="filteredAssets" [nzPageSize]="10" [nzLoading]="isUploadingMultiple"
       nzShowSizeChanger class="assets-table">
@@ -83,6 +86,17 @@
       </tbody>
     </nz-table>
   </div>
+
+  <!-- Preview Modal cho Picture Wall -->
+  <nz-modal
+    [nzVisible]="previewVisible"
+    [nzContent]="modalContent"
+    [nzFooter]="null"
+    (nzOnCancel)="previewVisible = false">
+    <ng-template #modalContent>
+      <img [src]="previewImage" [ngStyle]="{ width: '100%' }" />
+    </ng-template>
+  </nz-modal>
 
   <!-- Metadata Panel (Draggable) -->
   <div *ngIf="isMetadataPanelVisible && selectedAsset" class="metadata-panel" cdkDrag [cdkDragDisabled]="false"
@@ -138,3 +152,126 @@
     </div>
   </div>
 </div>
+
+<style>
+  .product-assets-container {
+    width: 100%;
+  }
+  
+  .required {
+    color: red;
+    margin-left: 4px;
+  }
+  
+  .asset-description {
+    color: #888;
+    margin-bottom: 10px;
+  }
+  
+  .section-header {
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .primary-asset-section, .additional-assets-section {
+    margin-bottom: 24px;
+  }
+  
+  .asset-preview {
+    width: 60px;
+    height: 60px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #f0f0f0;
+    border-radius: 4px;
+  }
+  
+  .image-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .video-preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background-color: #f0f0f0;
+  }
+  
+  .metadata-panel {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    width: 400px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+  }
+  
+  .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: move;
+  }
+  
+  .panel-content {
+    padding: 16px;
+  }
+  
+  .asset-preview-large {
+    width: 100%;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    overflow: hidden;
+    border: 1px solid #f0f0f0;
+    border-radius: 4px;
+  }
+  
+  .asset-preview-large img {
+    max-width: 100%;
+    max-height: 100%;
+  }
+  
+  .video-preview-large {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background-color: #f0f0f0;
+  }
+  
+  .form-item {
+    margin-bottom: 16px;
+  }
+  
+  .panel-footer {
+    margin-top: 16px;
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  .tag-select {
+    width: 100%;
+  }
+  
+  .no-tags {
+    color: #999;
+    font-style: italic;
+  }
+</style>

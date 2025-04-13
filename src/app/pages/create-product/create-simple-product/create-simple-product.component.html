@@ -167,7 +167,8 @@
 
   <nz-card nzTitle="Product Assets" class="basic-info-card">
     <app-product-assets
-      [initialAssets]="productAssets"
+      [initialPrimaryAsset]="productPrimaryAsset"
+      [initialAdditionalAssets]="productAdditionalAssets"
       (assetsUpdated)="onAssetsUpdated($event)">
     </app-product-assets>
   </nz-card>
