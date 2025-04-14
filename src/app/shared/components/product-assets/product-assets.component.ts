@@ -33,7 +33,7 @@ export interface Asset {
 }
 
 export interface ProductAsset {
-  id: string;
+  id?: string | null;
   asset: Asset;
   type: 'IMAGE' | 'VIDEO';
   isPrimary: boolean;
@@ -124,7 +124,7 @@ export class ProductAssetsComponent implements OnChanges {
   // Convert AssetMeta to NzUploadFile
   private assetMetaToNzUploadFile(asset: ProductAsset): NzUploadFile {
     return {
-      uid: asset.id,
+      uid: asset?.asset?.id || '',
       name: asset.asset.name,
       status: 'done',
       url: asset.url || '',
@@ -182,7 +182,7 @@ export class ProductAssetsComponent implements OnChanges {
       next: (response) => {
         const assetData = response.data;
         this.primaryAsset = {
-          id: assetData.id,
+          id: null,
           asset: {
             id: assetData.id,
             name: file.name,
@@ -255,7 +255,7 @@ export class ProductAssetsComponent implements OnChanges {
             next: (response) => {
               const data = response.data;
               resolve({
-                id: data.id,
+                id: null,
                 asset: {
                   id: data.id,
                   name: file.name,

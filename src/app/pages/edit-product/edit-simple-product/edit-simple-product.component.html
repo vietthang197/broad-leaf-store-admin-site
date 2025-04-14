@@ -3,7 +3,7 @@
     <h2 class="product-title">Cập nhật sản phẩm đơn giản (SIMPLE product)</h2>
   </div>
 
-  <nz-spin [nzSpinning]="isLoading" nzTip="Đang tải thông tin sản phẩm..." [nzSize]="'large'">
+  <nz-spin [nzSpinning]="isLoading" [nzTip]="isSubmitting ? 'Đang cập nhật sản phẩm...' : 'Đang tải thông tin sản phẩm...'" [nzSize]="'large'">
     <form nz-form nzLayout="horizontal" [formGroup]="productForm">
       <nz-card nzTitle="Thông tin cơ bản" class="basic-info-card">
         <nz-form-item>

@@ -313,6 +313,7 @@ export class EditSimpleProductComponent implements OnInit {
       return;
     }
 
+    this.isLoading = true;
     this.isSubmitting = true;
     
     // Chuẩn bị dữ liệu sản phẩm
@@ -362,12 +363,14 @@ export class EditSimpleProductComponent implements OnInit {
     // Gọi API cập nhật sản phẩm
     this.productService.updateProduct(this.productId, productData).subscribe({
       next: (response) => {
+        this.isLoading = false;
         this.isSubmitting = false;
         this.message.success('Cập nhật sản phẩm thành công!');
         // Điều hướng đến trang danh sách sản phẩm
         this.router.navigate(['/products']);
       },
       error: (error) => {
+        this.isLoading = false;
         this.isSubmitting = false;
         this.message.error('Cập nhật sản phẩm thất bại: ' + (error.error?.message || 'Lỗi không xác định'));
         console.error('Error updating product:', error);
