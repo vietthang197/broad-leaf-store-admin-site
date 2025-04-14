@@ -385,6 +385,8 @@ export class ProductAssetsComponent implements OnChanges {
     setTimeout(() => {
       this.emitAssetsUpdated();
       this.message.success('Đã cập nhật metadata!');
+      // Đóng panel sau khi lưu thành công
+      this.hideMetadataPanel();
     }, 500);
   }
 
