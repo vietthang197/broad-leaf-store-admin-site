@@ -19,7 +19,7 @@ import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { CommonModule } from '@angular/common';
 import { ProductAssetsComponent } from '../../../shared/components/product-assets/product-assets.component';
-import { AssetMeta, ProductAssets } from '../../../shared/components/product-assets/product-assets.component';
+import { ProductAsset, ProductAssets } from '../../../shared/components/product-assets/product-assets.component';
 import { CategoryService } from '../../../services/category.service';
 import { ProductService } from '../../../services/product.service';
 import { NzMessageService } from 'ng-zorro-antd/message';
@@ -106,8 +106,8 @@ export class EditSimpleProductComponent implements OnInit {
     value: 'VND'
   }];
 
-  productPrimaryAsset: AssetMeta | null = null;
-  productAdditionalAssets: AssetMeta[] = [];
+  productPrimaryAsset: ProductAsset | null = null;
+  productAdditionalAssets: ProductAsset[] = [];
   isSubmitting = false;
   isLoading = true;
   productId: string = '';
@@ -203,23 +203,35 @@ export class EditSimpleProductComponent implements OnInit {
         
         // Cập nhật assets
         if (product.primaryAsset) {
+          // Tạo URL cho ảnh
+          const assetUrl = `${environment.cdnBaseUrl}/api/v1/asset/download/${product.primaryAsset.asset.id}`;
+          
           this.productPrimaryAsset = {
             id: product.primaryAsset.id,
-            url: `${environment.cdnBaseUrl}/api/v1/asset/download/${product.primaryAsset.asset.id}`,
+            asset: product.primaryAsset.asset,
             type: product.primaryAsset.type,
-            title: product.primaryAsset.asset.name,
-            isPrimary: true
+            isPrimary: true,
+            altText: product.primaryAsset.altText || '',
+            tags: product.primaryAsset.tags || [],
+            url: assetUrl
           };
         }
         
         if (product.additionalAssets && product.additionalAssets.length > 0) {
-          this.productAdditionalAssets = product.additionalAssets.map((asset: any) => ({
-            id: asset.id,
-            url: `${environment.cdnBaseUrl}/api/v1/asset/download/${asset.asset.id}`,
-            type: asset.type,
-            title: asset.asset.name,
-            isPrimary: false
-          }));
+          this.productAdditionalAssets = product.additionalAssets.map((assetData: any) => {
+            // Tạo URL cho ảnh
+            const assetUrl = `${environment.cdnBaseUrl}/api/v1/asset/download/${assetData.asset.id}`;
+            
+            return {
+              id: assetData.id,
+              asset: assetData.asset,
+              type: assetData.type,
+              isPrimary: false,
+              altText: assetData.altText || '',
+              tags: assetData.tags || [],
+              url: assetUrl
+            };
+          });
         }
         
         this.isLoading = false;
@@ -306,18 +318,7 @@ export class EditSimpleProductComponent implements OnInit {
     // Chuẩn bị dữ liệu sản phẩm
     const formValue = this.productForm.value;
     
-    // Đảm bảo primary asset có thuộc tính isPrimary = true
-    const primaryAsset = {
-      ...this.productPrimaryAsset,
-      isPrimary: true
-    };
-    
-    // Đảm bảo additional assets có thuộc tính isPrimary = false
-    const additionalAssets = this.productAdditionalAssets.map(asset => ({
-      ...asset,
-      isPrimary: false
-    }));
-    
+    // Chuẩn bị dữ liệu sản phẩm theo cấu trúc API mới
     const productData = {
       id: this.productId,
       productType: formValue.productType,
@@ -328,8 +329,22 @@ export class EditSimpleProductComponent implements OnInit {
       availableOnline: formValue.availableOnline === 'true',
       description: formValue.description,
       attributes: this.customAttributes,
-      primaryAsset: primaryAsset,
-      additionalAssets: additionalAssets,
+      primaryAsset: {
+        id: this.productPrimaryAsset.id,
+        asset: this.productPrimaryAsset.asset,
+        type: this.productPrimaryAsset.type,
+        isPrimary: true,
+        altText: this.productPrimaryAsset.altText,
+        tags: this.productPrimaryAsset.tags
+      },
+      additionalAssets: this.productAdditionalAssets.map(asset => ({
+        id: asset.id,
+        asset: asset.asset,
+        type: asset.type,
+        isPrimary: false,
+        altText: asset.altText,
+        tags: asset.tags
+      })),
       cost: {
         amount: formValue.costAmount,
         currency: formValue.costCurrency

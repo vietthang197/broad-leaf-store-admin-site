@@ -19,11 +19,12 @@ import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { CommonModule } from '@angular/common';
 import { ProductAssetsComponent } from '../../../shared/components/product-assets/product-assets.component';
-import { AssetMeta, ProductAssets } from '../../../shared/components/product-assets/product-assets.component';
+import { ProductAsset, ProductAssets } from '../../../shared/components/product-assets/product-assets.component';
 import { CategoryService } from '../../../services/category.service';
 import { ProductService } from '../../../services/product.service';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Router } from '@angular/router';
+import { environment } from '../../../../environments/environment';
 
 interface CustomAttribute {
   name: string;
@@ -104,8 +105,8 @@ export class CreateSimpleProductComponent implements OnInit {
     value: 'VND'
   }]
 
-  productPrimaryAsset: AssetMeta | null = null;
-  productAdditionalAssets: AssetMeta[] = [];
+  productPrimaryAsset: ProductAsset | null = null;
+  productAdditionalAssets: ProductAsset[] = [];
   isSubmitting = false;
   
   constructor(
@@ -228,18 +229,7 @@ export class CreateSimpleProductComponent implements OnInit {
     // Chuẩn bị dữ liệu sản phẩm
     const formValue = this.productForm.value;
     
-    // Đảm bảo primary asset có thuộc tính isPrimary = true
-    const primaryAsset = {
-      ...this.productPrimaryAsset,
-      isPrimary: true
-    };
-    
-    // Đảm bảo additional assets có thuộc tính isPrimary = false
-    const additionalAssets = this.productAdditionalAssets.map(asset => ({
-      ...asset,
-      isPrimary: false
-    }));
-    
+    // Chuẩn bị dữ liệu sản phẩm theo cấu trúc API mới
     const productData = {
       productType: formValue.productType,
       name: formValue.name,
@@ -249,8 +239,22 @@ export class CreateSimpleProductComponent implements OnInit {
       availableOnline: formValue.availableOnline === 'true',
       description: formValue.description,
       attributes: this.customAttributes,
-      primaryAsset: primaryAsset,
-      additionalAssets: additionalAssets,
+      primaryAsset: {
+        id: this.productPrimaryAsset.id,
+        asset: this.productPrimaryAsset.asset,
+        type: this.productPrimaryAsset.type,
+        isPrimary: true,
+        altText: this.productPrimaryAsset.altText,
+        tags: this.productPrimaryAsset.tags
+      },
+      additionalAssets: this.productAdditionalAssets.map(asset => ({
+        id: asset.id,
+        asset: asset.asset,
+        type: asset.type,
+        isPrimary: false,
+        altText: asset.altText,
+        tags: asset.tags
+      })),
       cost: {
         amount: formValue.costAmount,
         currency: formValue.costCurrency
@@ -289,26 +293,51 @@ export class CreateSimpleProductComponent implements OnInit {
     // Giả lập API call để lấy assets của sản phẩm
     // Trong thực tế, bạn sẽ gọi API service
     setTimeout(() => {
+      const assetId = 'primary_123';
+      
       this.productPrimaryAsset = {
-        id: 'primary_123',
-        url: 'http://localhost:8888/assets/primary_123',
+        id: 'primary_asset_123',
+        asset: {
+          id: assetId,
+          name: 'Primary Product Image',
+          size: 100000,
+          extension: 'jpg',
+          localPath: '',
+          isDeleted: false,
+          createdAt: new Date().toISOString(),
+          createdBy: '',
+          updatedAt: '',
+          updatedBy: ''
+        },
         type: 'IMAGE',
-        title: 'Primary Product Image',
+        isPrimary: true,
         altText: 'Product main view',
         tags: ['main', 'featured'],
-        isPrimary: true
+        url: `${environment.cdnBaseUrl}/api/v1/asset/download/${assetId}`
       };
+      
+      const additionalAssetId = 'additional_456';
       this.productAdditionalAssets = [
         {
-          id: 'additional_456',
-          url: 'http://localhost:8888/assets/additional_456',
+          id: 'additional_asset_456',
+          asset: {
+            id: additionalAssetId,
+            name: 'Side view',
+            size: 80000,
+            extension: 'jpg',
+            localPath: '',
+            isDeleted: false,
+            createdAt: new Date().toISOString(),
+            createdBy: '',
+            updatedAt: '',
+            updatedBy: ''
+          },
           type: 'IMAGE',
-          title: 'Side view',
+          isPrimary: false,
           altText: 'Product side view',
           tags: ['side'],
-          isPrimary: false
+          url: `${environment.cdnBaseUrl}/api/v1/asset/download/${additionalAssetId}`
         }
-        // Thêm các assets khác nếu cần
       ];
     }, 1000);
   }

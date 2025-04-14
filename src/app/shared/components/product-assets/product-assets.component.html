@@ -27,8 +27,11 @@
       <!-- Hiển thị ảnh đã upload -->
       <div *ngIf="primaryAsset" class="primary-image-container">
         <div class="image-wrapper">
-          <!-- Chỉ hiển thị ảnh vì primary asset chỉ chấp nhận IMAGE -->
-          <img [src]="primaryAsset.url" [alt]="primaryAsset.title || 'Primary image'" />
+          <!-- Hiển thị ảnh nếu là IMAGE -->
+          <img *ngIf="isImage(primaryAsset)" [src]="primaryAsset.url || ''" [alt]="primaryAsset.altText || 'Primary image'" />
+          
+          <!-- Hiển thị video nếu là VIDEO -->
+          <video *ngIf="isVideo(primaryAsset)" [src]="primaryAsset.url || ''" controls></video>
           
           <div class="image-actions">
             <button nz-button nzType="primary" nzShape="circle" nzSize="small" (click)="previewPrimaryImage()" nz-tooltip nzTooltipTitle="Xem">
@@ -75,14 +78,14 @@
       <tbody>
         <tr *ngFor="let asset of assetsTable.data; let i = index">
           <td>
-            <div class="asset-preview" (click)="previewImage = asset.url; isImagePreview = asset.type === 'IMAGE'; previewVisible = true" [ngStyle]="{'cursor': 'pointer'}">
-              <img *ngIf="isImage(asset)" class="image-preview" [src]="asset.url" [alt]="asset.altText || 'Asset preview'" />
+            <div class="asset-preview" (click)="previewImage = asset.url || ''; isImagePreview = asset.type === 'IMAGE'; previewVisible = true" [ngStyle]="{'cursor': 'pointer'}">
+              <img *ngIf="isImage(asset)" class="image-preview" [src]="asset.url || ''" [alt]="asset.altText || 'Asset preview'" />
               <div *ngIf="isVideo(asset)" class="video-preview">
                 <span nz-icon nzType="play-circle" nzTheme="outline"></span>
               </div>
             </div>
           </td>
-          <td>{{ asset.title }}</td>
+          <td>{{ asset.asset?.name }}</td>
           <td>{{ asset.type }}</td>
           <td>
             <nz-tag *ngFor="let tag of asset.tags">{{ tag }}</nz-tag>
@@ -131,8 +134,8 @@
     </div>
 
     <div class="panel-content">
-      <div class="asset-preview-large" (click)="previewImage = selectedAsset.url; isImagePreview = selectedAsset.type === 'IMAGE'; previewVisible = true" [ngStyle]="{'cursor': 'pointer'}">
-        <img *ngIf="isImage(selectedAsset)" [src]="selectedAsset.url"
+      <div class="asset-preview-large" (click)="previewImage = selectedAsset.url || ''; isImagePreview = selectedAsset.type === 'IMAGE'; previewVisible = true" [ngStyle]="{'cursor': 'pointer'}">
+        <img *ngIf="isImage(selectedAsset)" [src]="selectedAsset.url || ''"
           [alt]="selectedAsset.altText || 'Asset preview'" />
         <div *ngIf="isVideo(selectedAsset)" class="video-preview-large">
           <span nz-icon nzType="play-circle" nzTheme="outline"></span>
@@ -148,7 +151,7 @@
 
         <div class="form-item">
           <label>URL</label>
-          <input nz-input [value]="selectedAsset.url" disabled />
+          <input nz-input [value]="selectedAsset.url || ''" disabled />
         </div>
 
         <div class="form-item">

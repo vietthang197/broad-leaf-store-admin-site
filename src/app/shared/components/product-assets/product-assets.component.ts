@@ -19,20 +19,34 @@ import { environment } from '../../../../environments/environment';
 import { AssetService } from '../../../services/asset.service';
 import { Observable } from 'rxjs';
 
-export interface AssetMeta {
+export interface Asset {
   id: string;
-  url: string;
+  name: string;
+  size?: number;
+  extension?: string;
+  localPath?: string;
+  isDeleted?: boolean;
+  createdAt?: string;
+  createdBy?: string;
+  updatedAt?: string;
+  updatedBy?: string;
+}
+
+export interface ProductAsset {
+  id: string;
+  asset: Asset;
   type: 'IMAGE' | 'VIDEO';
-  title?: string;
+  isPrimary: boolean;
   altText?: string;
   tags?: string[];
+  // Thêm các trường bổ sung cho UI
+  url?: string;
   file?: File;
-  isPrimary?: boolean;
 }
 
 export interface ProductAssets {
-  primaryAsset: AssetMeta | null;
-  additionalAssets: AssetMeta[];
+  primaryAsset: ProductAsset | null;
+  additionalAssets: ProductAsset[];
 }
 
 @Component({
@@ -61,8 +75,8 @@ export interface ProductAssets {
   ]
 })
 export class ProductAssetsComponent implements OnChanges {
-  @Input() initialPrimaryAsset: AssetMeta | null = null;
-  @Input() initialAdditionalAssets: AssetMeta[] = [];
+  @Input() initialPrimaryAsset: ProductAsset | null = null;
+  @Input() initialAdditionalAssets: ProductAsset[] = [];
   @Output() assetsUpdated = new EventEmitter<ProductAssets>();
 
   // Properties for picture wall
@@ -74,9 +88,9 @@ export class ProductAssetsComponent implements OnChanges {
   isImagePreview = true; // Mặc định là xem ảnh
 
   // Original properties
-  primaryAsset: AssetMeta | null = null;
-  additionalAssets: AssetMeta[] = [];
-  selectedAsset: AssetMeta | null = null;
+  primaryAsset: ProductAsset | null = null;
+  additionalAssets: ProductAsset[] = [];
+  selectedAsset: ProductAsset | null = null;
   isMetadataPanelVisible = false;
   isUploading = false;
   isUploadingMultiple = false;
@@ -108,13 +122,13 @@ export class ProductAssetsComponent implements OnChanges {
   }
 
   // Convert AssetMeta to NzUploadFile
-  private assetMetaToNzUploadFile(asset: AssetMeta): NzUploadFile {
+  private assetMetaToNzUploadFile(asset: ProductAsset): NzUploadFile {
     return {
       uid: asset.id,
-      name: asset.title || 'image',
+      name: asset.asset.name,
       status: 'done',
-      url: asset.url,
-      thumbUrl: asset.url,
+      url: asset.url || '',
+      thumbUrl: asset.url || '',
       response: { data: { id: asset.id } }
     };
   }
@@ -169,11 +183,24 @@ export class ProductAssetsComponent implements OnChanges {
         const assetData = response.data;
         this.primaryAsset = {
           id: assetData.id,
-          url: `${environment.cdnBaseUrl}` + "/api/v1/asset/download/" + assetData.id,
+          asset: {
+            id: assetData.id,
+            name: file.name,
+            size: file.size,
+            extension: file.name.split('.').pop(),
+            localPath: '',
+            isDeleted: false,
+            createdAt: new Date().toISOString(),
+            createdBy: '',
+            updatedAt: new Date().toISOString(),
+            updatedBy: ''
+          },
           type: 'IMAGE',
-          title: file.name,
+          isPrimary: true,
+          altText: '',
           tags: [],
-          isPrimary: true
+          url: `${environment.cdnBaseUrl}` + "/api/v1/asset/download/" + assetData.id,
+          file: file
         };
         
         // Update the file list for UI
@@ -196,7 +223,7 @@ export class ProductAssetsComponent implements OnChanges {
     if (files.length === 0) return;
     
     this.isUploadingMultiple = true;
-    const uploadPromises: Promise<AssetMeta>[] = [];
+    const uploadPromises: Promise<ProductAsset>[] = [];
     
     // Tạo mảng các promise upload
     for (let i = 0; i < files.length; i++) {
@@ -218,7 +245,7 @@ export class ProductAssetsComponent implements OnChanges {
       
       // Tạo promise upload
       uploadPromises.push(
-        new Promise<AssetMeta>((resolve) => {
+        new Promise<ProductAsset>((resolve) => {
           
           // Thực tế sẽ gọi API:
           const formData = new FormData();
@@ -229,11 +256,24 @@ export class ProductAssetsComponent implements OnChanges {
               const data = response.data;
               resolve({
                 id: data.id,
-                url: `${environment.cdnBaseUrl}` + "/api/v1/asset/download/" + data.id,
+                asset: {
+                  id: data.id,
+                  name: file.name,
+                  size: file.size,
+                  extension: file.name.split('.').pop(),
+                  localPath: '',
+                  isDeleted: false,
+                  createdAt: new Date().toISOString(),
+                  createdBy: '',
+                  updatedAt: new Date().toISOString(),
+                  updatedBy: ''
+                },
                 type: file.type.startsWith('image/') ? 'IMAGE' : 'VIDEO',
-                title: file.name,
+                isPrimary: false,
+                altText: '',
                 tags: [],
-                isPrimary: false
+                url: `${environment.cdnBaseUrl}` + "/api/v1/asset/download/" + data.id,
+                file: file
               });
             },
             error: (error) => {
@@ -247,7 +287,7 @@ export class ProductAssetsComponent implements OnChanges {
     
     // Xử lý tất cả các promise upload
     Promise.all(uploadPromises).then(assets => {
-      const validAssets = assets.filter(asset => asset !== null) as AssetMeta[];
+      const validAssets = assets.filter(asset => asset !== null) as ProductAsset[];
       this.additionalAssets = [...this.additionalAssets, ...validAssets];
       this.updateAdditionalFileList();
       this.isUploadingMultiple = false;
@@ -292,12 +332,12 @@ export class ProductAssetsComponent implements OnChanges {
   }
   
   // Chọn asset để xem/chỉnh sửa metadata
-  selectAsset(asset: AssetMeta): void {
+  selectAsset(asset: ProductAsset): void {
     this.selectedAsset = asset;
     
     // Cập nhật form với dữ liệu của asset được chọn
     this.metadataForm.patchValue({
-      title: asset.title || '',
+      title: asset.asset.name,
       altText: asset.altText || '',
       tags: asset.tags || []
     });
@@ -324,7 +364,11 @@ export class ProductAssetsComponent implements OnChanges {
     // Cập nhật metadata cho asset được chọn
     const updatedAsset = {
       ...this.selectedAsset,
-      title: formValue.title,
+      asset: {
+        ...this.selectedAsset.asset,
+        name: formValue.title,
+        updatedAt: new Date().toISOString()
+      },
       altText: formValue.altText,
       tags: formValue.tags
     };
@@ -350,11 +394,11 @@ export class ProductAssetsComponent implements OnChanges {
   }
 
   // Phương thức mới để hiển thị panel metadata cho asset cụ thể
-  showMetadataPanelForAsset(asset: AssetMeta): void {
+  showMetadataPanelForAsset(asset: ProductAsset): void {
     // Cập nhật selectedAsset và form
     this.selectedAsset = asset;
     this.metadataForm.patchValue({
-      title: asset.title || '',
+      title: asset.asset.name,
       altText: asset.altText || '',
       tags: asset.tags || []
     });
@@ -364,11 +408,11 @@ export class ProductAssetsComponent implements OnChanges {
   }
 
   // Lọc assets theo searchText
-  get filteredAssets(): AssetMeta[] {
+  get filteredAssets(): ProductAsset[] {
     if (!this.searchText) return this.additionalAssets;
     
     return this.additionalAssets.filter(asset => 
-      asset.title?.toLowerCase().includes(this.searchText.toLowerCase()) ||
+      asset.asset.name?.toLowerCase().includes(this.searchText.toLowerCase()) ||
       asset.tags?.some(tag => tag.toLowerCase().includes(this.searchText.toLowerCase()))
     );
   }
@@ -383,18 +427,18 @@ export class ProductAssetsComponent implements OnChanges {
   }
 
   // Helper methods
-  isImage(asset: AssetMeta | null): boolean {
+  isImage(asset: ProductAsset | null): boolean {
     return asset?.type === 'IMAGE';
   }
 
-  isVideo(asset: AssetMeta | null): boolean {
+  isVideo(asset: ProductAsset | null): boolean {
     return asset?.type === 'VIDEO';
   }
 
   // Hiển thị preview ảnh primary
   previewPrimaryImage(): void {
     if (this.primaryAsset) {
-      this.previewImage = this.primaryAsset.url;
+      this.previewImage = this.primaryAsset.url || '';
       this.isImagePreview = this.primaryAsset.type === 'IMAGE';
       this.previewVisible = true;
     }
