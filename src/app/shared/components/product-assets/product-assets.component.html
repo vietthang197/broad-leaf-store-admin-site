@@ -55,8 +55,8 @@
           <input type="file" #fileInput multiple style="display: none" (change)="uploadAdditionalAssets($event)"
             accept="image/*,video/*" />
           <button nz-button nzType="primary" (click)="fileInput.click()" [nzLoading]="isUploadingMultiple">
-            <span nz-icon nzType="upload"></span>
-            Upload
+            <span nz-icon nzType="file-add"></span>
+            Choose additional assets
           </button>
         </div>
       </div>
