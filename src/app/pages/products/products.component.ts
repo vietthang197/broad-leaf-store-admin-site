@@ -148,14 +148,14 @@ export class ProductsComponent implements OnInit {
     this.isLoading = true;
     const params = {
       ...this.searchForm.value,
-      page: this.pageIndex,
+      page: this.pageIndex - 1,
       size: this.pageSize
     };
 
     this.productService.getProducts(params).subscribe({
       next: (response) => {
-        this.listOfData = response.data;
-        this.total = response.total;
+        this.listOfData = response.content;
+        this.total = response.totalElements;
         this.isLoading = false;
       },
       error: (error) => {
@@ -253,7 +253,7 @@ export class ProductsComponent implements OnInit {
   }
 
   formatDate(date: string): string {
-    return new Date(date).toLocaleString();
+    return new Date(date).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
   }
 
   deleteProduct(id: string): void {

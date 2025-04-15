@@ -37,10 +37,10 @@ export class ProductService {
     }
     
     // Thêm tham số phân trang
-    httpParams = httpParams.set('page', params.page || 1);
+    httpParams = httpParams.set('page', params.pageIndex - 1 || 0);
     httpParams = httpParams.set('size', params.size || 10);
 
-    return this.http.get<any>(this.apiUrl, { params: httpParams });
+    return this.http.get<any>(`${environment.apiUrl}/api/v1/products`, { params: httpParams });
   }
   
   updateProduct(id: string, productData: any): Observable<any> {

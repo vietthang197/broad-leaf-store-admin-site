@@ -128,8 +128,8 @@
           <td>
             <nz-badge [nzStatus]="data.availableOnline ? 'success' : 'default'" [nzText]="data.availableOnline ? 'Đang bán' : 'Ngừng bán'"></nz-badge>
           </td>
-          <td>{{ formatDate(data.createdAt) }}</td>
-          <td>{{ formatDate(data.updatedAt) }}</td>
+          <td>{{ data?.createdAt ? formatDate(data.createdAt) : '' }}</td>
+          <td>{{ data?.updatedAt ? formatDate(data.updatedAt) : '' }}</td>
           <td>
             <a (click)="router.navigate(['/edit-product/simple', data.id])">Chỉnh sửa</a>
             <nz-divider nzType="vertical"></nz-divider>
