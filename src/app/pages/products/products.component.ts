@@ -6,24 +6,59 @@ import {NzFormDirective} from 'ng-zorro-antd/form';
 import {NzColDirective, NzRowDirective} from 'ng-zorro-antd/grid';
 import {NzInputDirective} from 'ng-zorro-antd/input';
 import {NzOptionComponent, NzSelectComponent} from 'ng-zorro-antd/select';
-import {NzDatePickerComponent} from 'ng-zorro-antd/date-picker';
 import {NzButtonComponent} from 'ng-zorro-antd/button';
 import {NzIconDirective} from 'ng-zorro-antd/icon';
 import {NzTableComponent, NzTdAddOnComponent, NzThMeasureDirective, NzThSelectionComponent} from 'ng-zorro-antd/table';
 import {NzBadgeComponent} from 'ng-zorro-antd/badge';
 import {NzDividerComponent} from 'ng-zorro-antd/divider';
-import {NgClass, NgForOf} from '@angular/common';
+import {NgClass, NgForOf, NgIf} from '@angular/common';
 import {NzMessageService} from 'ng-zorro-antd/message';
 import { NzModalModule } from 'ng-zorro-antd/modal';
+import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 import { Router } from '@angular/router';
+import { ProductService } from '../../services/product.service';
+import { CategoryService } from '../../services/category.service';
+import { environment } from '../../../environments/environment';
 
-interface DataItem {
+interface Product {
   id: string;
-  ruleName: string;
+  name: string;
+  category: {
+    name: string;
+  };
+  salePrice: {
+    amount: number;
+    currency: string;
+  };
+  regularPrice: {
+    amount: number;
+    currency: string;
+  };
+  cost: {
+    amount: number;
+    currency: string;
+  };
+  quantity: number;
+  availableOnline: boolean;
+  sku: string;
+  primaryAsset: {
+    asset: {
+      id: string;
+      name: string;
+    };
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
   description: string;
-  serviceCalls: number;
-  status: 'running' | 'default';
-  lastScheduled: string;
+  parentCategoryId: string | null;
+  createdAt: string | null;
+  updatedAt: string | null;
 }
 
 @Component({
@@ -40,7 +75,6 @@ interface DataItem {
     NzInputDirective,
     NzSelectComponent,
     NzOptionComponent,
-    NzDatePickerComponent,
     NzButtonComponent,
     NzIconDirective,
     NzTableComponent,
@@ -49,11 +83,14 @@ interface DataItem {
     NzBadgeComponent,
     NzDividerComponent,
     NgForOf,
+    NgIf,
     NzThMeasureDirective,
     NgClass,
-    NzModalModule
+    NzModalModule,
+    NzPopconfirmModule
   ],
-  styleUrls: ['./products.component.scss']
+  styleUrls: ['./products.component.scss'],
+  standalone: true
 })
 export class ProductsComponent implements OnInit {
   searchForm!: FormGroup;
@@ -62,7 +99,12 @@ export class ProductsComponent implements OnInit {
   indeterminate = false;
   setOfCheckedId = new Set<string>();
 
-  listOfData: DataItem[] = [];
+  listOfData: Product[] = [];
+  categories: Category[] = [];
+  isLoading = false;
+  pageIndex = 1;
+  pageSize = 10;
+  total = 0;
 
   isAddProductModalVisible = false;
   addProductTypeForm!: FormGroup;
@@ -70,44 +112,79 @@ export class ProductsComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private message: NzMessageService,
-    private router: Router
-  
+    public router: Router,
+    private productService: ProductService,
+    private categoryService: CategoryService
   ) {}
 
   ngOnInit(): void {
     this.searchForm = this.fb.group({
-      ruleName: [null],
-      description: [null],
-      serviceCalls: [null],
-      status: [null],
-      lastScheduled: [null]
+      name: [null],
+      sku: [null],
+      category: [null],
+      availableOnline: [null]
     });
 
     this.addProductTypeForm = this.fb.group({
       productType: [null, [Validators.required]]
     });
 
-    this.listOfData = Array.from({ length: 100 }).map((_, i) => ({
-      id: `${i}`,
-      ruleName: `Rule name ${i}`,
-      description: `This is description ${i}`,
-      serviceCalls: Math.floor(Math.random() * 100),
-      status: Math.random() > 0.5 ? 'running' : 'default',
-      lastScheduled: `2023-${Math.floor(Math.random() * 12) + 1}-${Math.floor(Math.random() * 28) + 1}`
-    }));
+    this.loadCategories();
+    this.loadProducts();
   }
 
-  toggleCollapse(): void {
-    this.isCollapsed = !this.isCollapsed;
+  loadCategories(): void {
+    this.categoryService.getCategories().subscribe({
+      next: (data) => {
+        this.categories = data;
+      },
+      error: (err) => {
+        console.error('Error loading categories:', err);
+      }
+    });
+  }
+
+  loadProducts(): void {
+    this.isLoading = true;
+    const params = {
+      ...this.searchForm.value,
+      page: this.pageIndex,
+      size: this.pageSize
+    };
+
+    this.productService.getProducts(params).subscribe({
+      next: (response) => {
+        this.listOfData = response.data;
+        this.total = response.total;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        this.isLoading = false;
+        this.message.error('Không thể tải danh sách sản phẩm: ' + error.message);
+      }
+    });
+  }
+
+  onPageChange(pageIndex: number): void {
+    this.pageIndex = pageIndex;
+    this.loadProducts();
+  }
+
+  onPageSizeChange(pageSize: number): void {
+    this.pageSize = pageSize;
+    this.pageIndex = 1;
+    this.loadProducts();
   }
 
   search(): void {
-    console.log('Search with:', this.searchForm.value);
-    // Thêm logic tìm kiếm thực tế ở đây
+    this.pageIndex = 1;
+    this.loadProducts();
   }
 
   reset(): void {
     this.searchForm.reset();
+    this.pageIndex = 1;
+    this.loadProducts();
   }
 
   onAllChecked(checked: boolean): void {
@@ -169,5 +246,34 @@ export class ProductsComponent implements OnInit {
         }
       });
     }
+  }
+
+  formatPrice(price: { amount: number, currency: string }): string {
+    return `${price.amount.toLocaleString()} ${price.currency}`;
+  }
+
+  formatDate(date: string): string {
+    return new Date(date).toLocaleString();
+  }
+
+  deleteProduct(id: string): void {
+    this.isLoading = true;
+    this.productService.deleteProduct(id).subscribe({
+      next: () => {
+        this.message.success('Xóa sản phẩm thành công!');
+        this.loadProducts();
+      },
+      error: (error) => {
+        this.isLoading = false;
+        this.message.error('Xóa sản phẩm thất bại: ' + error.message);
+      }
+    });
+  }
+  
+  getAssetUrl(asset: any): string {
+    if (!asset || !asset.asset || !asset.asset.id) {
+      return 'assets/images/no-image.png';
+    }
+    return `${environment.cdnBaseUrl}/api/v1/asset/download/${asset.asset.id}`;
   }
 }

@@ -12,46 +12,46 @@
         <div nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32 }">
           <div nz-col [nzXs]="24" [nzSm]="12" [nzMd]="8" [nzLg]="6">
             <nz-form-item>
-              <nz-form-label>Rule Name</nz-form-label>
+              <nz-form-label>Tên sản phẩm</nz-form-label>
               <nz-form-control>
-                <input nz-input formControlName="ruleName" placeholder="Please enter" />
+                <input nz-input formControlName="name" placeholder="Nhập tên sản phẩm" />
               </nz-form-control>
             </nz-form-item>
           </div>
           <div nz-col [nzXs]="24" [nzSm]="12" [nzMd]="8" [nzLg]="6">
             <nz-form-item>
-              <nz-form-label>Description:</nz-form-label>
+              <nz-form-label>SKU</nz-form-label>
               <nz-form-control>
-                <input nz-input formControlName="description" placeholder="Please enter" />
+                <input nz-input formControlName="sku" placeholder="Nhập SKU" />
               </nz-form-control>
             </nz-form-item>
           </div>
           <div nz-col [nzXs]="24" [nzSm]="12" [nzMd]="8" [nzLg]="6">
             <nz-form-item>
-              <nz-form-label>Number of Service Calls</nz-form-label>
+              <nz-form-label>Danh mục</nz-form-label>
               <nz-form-control>
-                <input nz-input formControlName="serviceCalls" placeholder="Please enter" />
-              </nz-form-control>
-            </nz-form-item>
-          </div>
-          <div nz-col [nzXs]="24" [nzSm]="12" [nzMd]="8" [nzLg]="6">
-            <nz-form-item>
-              <nz-form-label>Status:</nz-form-label>
-              <nz-form-control>
-                <nz-select formControlName="status" nzPlaceHolder="Please select">
-                  <nz-option nzValue="running" nzLabel="Running"></nz-option>
-                  <nz-option nzValue="default" nzLabel="Default"></nz-option>
+                <nz-select
+                  formControlName="category"
+                  nzPlaceHolder="Chọn danh mục"
+                  nzAllowClear
+                >
+                  <nz-option
+                    *ngFor="let category of categories"
+                    [nzValue]="category.id"
+                    [nzLabel]="category.name"
+                  ></nz-option>
                 </nz-select>
               </nz-form-control>
             </nz-form-item>
           </div>
-        </div>
-        <div nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32 }">
           <div nz-col [nzXs]="24" [nzSm]="12" [nzMd]="8" [nzLg]="6">
             <nz-form-item>
-              <nz-form-label>Last Scheduled at:</nz-form-label>
+              <nz-form-label>Trạng thái</nz-form-label>
               <nz-form-control>
-                <nz-date-picker class="full-width" formControlName="lastScheduled" nzPlaceHolder="Please select"></nz-date-picker>
+                <nz-select formControlName="availableOnline" nzPlaceHolder="Chọn trạng thái">
+                  <nz-option nzValue="true" nzLabel="Đang bán"></nz-option>
+                  <nz-option nzValue="false" nzLabel="Ngừng bán"></nz-option>
+                </nz-select>
               </nz-form-control>
             </nz-form-item>
           </div>
@@ -61,7 +61,7 @@
         <div nz-col [nzSpan]="24" class="search-buttons">
           <button nz-button nzType="primary" (click)="search()">Tìm kiếm</button>
           <button nz-button (click)="reset()">Làm mới</button>
-          <a nz-button nzType="link" (click)="toggleCollapse()">
+          <a nz-button nzType="link" (click)="isCollapsed = !isCollapsed">
             {{ isCollapsed ? 'Mở rộng' : 'Thu gọn' }} <i nz-icon [nzType]="isCollapsed ? 'down' : 'up'"></i>
           </a>
         </div>
@@ -76,14 +76,8 @@
         <button nz-button nzType="primary" (click)="showAddProductModal()">
           <i nz-icon nzType="plus"></i>Thêm mới
         </button>
-        <button nz-button nzType="default" nzShape="circle">
+        <button nz-button nzType="default" nzShape="circle" (click)="loadProducts()">
           <i nz-icon nzType="reload"></i>
-        </button>
-        <button nz-button nzType="default" nzShape="circle">
-          <i nz-icon nzType="column-height"></i>
-        </button>
-        <button nz-button nzType="default" nzShape="circle">
-          <i nz-icon nzType="setting"></i>
         </button>
       </div>
     </div>
@@ -91,35 +85,55 @@
     <nz-table
       #basicTable
       [nzData]="listOfData"
+      [nzLoading]="isLoading"
       [nzShowPagination]="true"
-      [nzPageSize]="10"
-      [nzScroll]="{ x: '800px' }"
+      [nzPageSize]="pageSize"
+      [nzTotal]="total"
+      [nzPageIndex]="pageIndex"
+      (nzPageIndexChange)="onPageChange($event)"
+      (nzPageSizeChange)="onPageSizeChange($event)"
+      [nzScroll]="{ x: '1200px' }"
     >
       <thead>
         <tr>
           <th [nzWidth]="'60px'" [nzChecked]="checked" [nzIndeterminate]="indeterminate" (nzCheckedChange)="onAllChecked($event)"></th>
-          <th>Rule Name</th>
-          <th>Description</th>
-          <th>Number of Service Calls</th>
-          <th>Status</th>
-          <th>Last Scheduled at</th>
-          <th [nzWidth]="'200px'">Option</th>
+          <th [nzWidth]="'150px'">Ảnh</th>
+          <th [nzWidth]="'200px'">Tên sản phẩm</th>
+          <th [nzWidth]="'120px'">SKU</th>
+          <th [nzWidth]="'150px'">Danh mục</th>
+          <th [nzWidth]="'120px'">Giá bán</th>
+          <th [nzWidth]="'120px'">Giá sale</th>
+          <th [nzWidth]="'120px'">Giá nhập</th>
+          <th [nzWidth]="'100px'">Số lượng</th>
+          <th [nzWidth]="'100px'">Trạng thái</th>
+          <th [nzWidth]="'150px'">Ngày tạo</th>
+          <th [nzWidth]="'150px'">Ngày cập nhật</th>
+          <th [nzWidth]="'150px'">Thao tác</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let data of basicTable.data">
           <td [nzChecked]="setOfCheckedId.has(data.id)" (nzCheckedChange)="onItemChecked(data.id, $event)"></td>
-          <td>{{ data.ruleName }}</td>
-          <td>{{ data.description }}</td>
-          <td>{{ data.serviceCalls }}</td>
           <td>
-            <nz-badge [nzStatus]="data.status === 'running' ? 'processing' : 'default'" [nzText]="data.status"></nz-badge>
+            <img *ngIf="data.primaryAsset" [src]="getAssetUrl(data.primaryAsset)" [alt]="data.name" style="width: 50px; height: 50px; object-fit: cover;" />
+            <img *ngIf="!data.primaryAsset" src="assets/images/no-image.png" alt="No image" style="width: 50px; height: 50px; object-fit: cover;" />
           </td>
-          <td>{{ data.lastScheduled }}</td>
+          <td>{{ data?.name }}</td>
+          <td>{{ data?.sku }}</td>
+          <td>{{ data?.category?.name || 'N/A' }}</td>
+          <td>{{ formatPrice(data.regularPrice) }}</td>
+          <td>{{ formatPrice(data.salePrice) }}</td>
+          <td>{{ formatPrice(data.cost) }}</td>
+          <td>{{ data?.quantity }}</td>
           <td>
-            <a>Configuration</a>
+            <nz-badge [nzStatus]="data.availableOnline ? 'success' : 'default'" [nzText]="data.availableOnline ? 'Đang bán' : 'Ngừng bán'"></nz-badge>
+          </td>
+          <td>{{ formatDate(data.createdAt) }}</td>
+          <td>{{ formatDate(data.updatedAt) }}</td>
+          <td>
+            <a (click)="router.navigate(['/edit-product/simple', data.id])">Chỉnh sửa</a>
             <nz-divider nzType="vertical"></nz-divider>
-            <a>Subscribe to alerts</a>
+            <a nz-popconfirm nzPopconfirmTitle="Bạn có chắc chắn muốn xóa sản phẩm này?" (nzOnConfirm)="deleteProduct(data.id)">Xóa</a>
           </td>
         </tr>
       </tbody>

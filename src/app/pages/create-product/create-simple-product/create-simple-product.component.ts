@@ -131,7 +131,8 @@ export class CreateSimpleProductComponent implements OnInit {
       salePriceAmount: [null, [Validators.required]],
       salePriceCurrency: [null, [Validators.required]],
       costAmount: [null, [Validators.required]],
-      costCurrency: [null, [Validators.required]]
+      costCurrency: [null, [Validators.required]],
+      quantity: [0, [Validators.required, Validators.min(0)]]
     });
 
     this.initAttributeForm();
@@ -239,6 +240,7 @@ export class CreateSimpleProductComponent implements OnInit {
       availableOnline: formValue.availableOnline === 'true',
       description: formValue.description,
       attributes: this.customAttributes,
+      quantity: formValue.quantity,
       primaryAsset: {
         id: this.productPrimaryAsset.id,
         asset: this.productPrimaryAsset.asset,

@@ -51,6 +51,14 @@
             </nz-radio-group>
           </nz-form-control>
         </nz-form-item>
+
+        <!-- Số lượng sản phẩm -->
+        <nz-form-item>
+          <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired>Số lượng</nz-form-label>
+          <nz-form-control [nzSm]="18" [nzXs]="24" nzErrorTip="Vui lòng nhập số lượng sản phẩm!">
+              <nz-input-number formControlName="quantity" [nzMin]="0" [nzStep]="1" class="full-width"></nz-input-number>
+          </nz-form-control>
+        </nz-form-item>
       </nz-card>
 
       <nz-card nzTitle="Mô tả sản phẩm" class="basic-info-card">

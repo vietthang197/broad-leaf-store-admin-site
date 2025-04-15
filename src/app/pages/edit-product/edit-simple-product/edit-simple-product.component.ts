@@ -151,7 +151,8 @@ export class EditSimpleProductComponent implements OnInit {
       salePriceAmount: [null, [Validators.required]],
       salePriceCurrency: ['VND', [Validators.required]],
       costAmount: [null, [Validators.required]],
-      costCurrency: ['VND', [Validators.required]]
+      costCurrency: ['VND', [Validators.required]],
+      quantity: [0, [Validators.required, Validators.min(0)]]
     });
 
     this.initAttributeForm();
@@ -190,7 +191,8 @@ export class EditSimpleProductComponent implements OnInit {
           salePriceAmount: product.salePrice?.amount,
           salePriceCurrency: product.salePrice?.currency,
           costAmount: product.cost?.amount,
-          costCurrency: product.cost?.currency
+          costCurrency: product.cost?.currency,
+          quantity: product.quantity || 0
         });
         
         // Cập nhật attributes
@@ -330,6 +332,7 @@ export class EditSimpleProductComponent implements OnInit {
       availableOnline: formValue.availableOnline === 'true',
       description: formValue.description,
       attributes: this.customAttributes,
+      quantity: formValue.quantity,
       primaryAsset: {
         id: this.productPrimaryAsset.id,
         asset: this.productPrimaryAsset.asset,
