@@ -5,7 +5,7 @@ metadata:
   name: broad-leaf-store-admin-site
   namespace: default
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: broad-leaf-store-admin-site
@@ -39,7 +39,7 @@ spec:
   ports:
     - port: 80
       targetPort: 80
-      nodePort: 30889
+      nodePort: 30081
   sessionAffinity: None  # Đảm bảo không giữ phiên để load balancing hoạt động đúng
   externalTrafficPolicy: Local
 ---
