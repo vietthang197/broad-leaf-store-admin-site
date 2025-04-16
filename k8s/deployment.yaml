@@ -1,0 +1,80 @@
+# deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: broad-leaf-store-admin-site
+  namespace: default
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: broad-leaf-store-admin-site
+  template:
+    metadata:
+      labels:
+        app: broad-leaf-store-admin-site
+    spec:
+      containers:
+        - name: broad-leaf-store-admin-site
+          image: registrydocker.devto.shop/broad-leaf-store-admin-site:latest
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "500m"
+              memory: "1024Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: broad-leaf-store-admin-site-service
+  namespace: default
+spec:
+  type: NodePort
+  selector:
+    app: broad-leaf-store-admin-site
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 30889
+  sessionAffinity: None  # Đảm bảo không giữ phiên để load balancing hoạt động đúng
+  externalTrafficPolicy: Local
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: broad-leaf-store-admin-site-ingress
+  namespace: default
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/load-balance: "round_robin"
+    # Forward IP configurations
+    nginx.ingress.kubernetes.io/use-forwarded-headers: "true"
+    nginx.ingress.kubernetes.io/proxy-real-ip-cidr: "0.0.0.0/0"
+    nginx.ingress.kubernetes.io/server-snippets: "gzip on;"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      location ~* \.(jpg|jpeg|png|gif|ico|css|js|woff2|ttf)$ {
+        expires 1h;
+        add_header Cache-Control "public, no-transform";
+      }
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto $scheme;
+      proxy_set_header X-Forwarded-Host $host;
+spec:
+  rules:
+    - host: app.194.233.70.185.nip.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: broad-leaf-store-admin-site-service
+                port:
+                  number: 80
