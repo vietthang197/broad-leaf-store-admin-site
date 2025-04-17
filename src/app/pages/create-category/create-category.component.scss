@@ -1,0 +1,64 @@
+.category-form-container {
+  padding: 24px;
+}
+
+.category-header {
+  margin-bottom: 24px;
+}
+
+.category-title {
+  font-size: 24px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.basic-info-card {
+  margin-bottom: 24px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+// Styling cho Quill editor
+::ng-deep {
+  .ql-container {
+    min-height: 150px;
+  }
+  
+  .ql-editor {
+    min-height: 150px;
+  }
+}
+
+// Style cho select category
+.category-container {
+  width: 100%;
+  
+  .category-select {
+    width: 100%;
+  }
+}
+
+// Style chung cho form
+nz-form-item {
+  margin-bottom: 24px;
+}
+
+nz-form-label {
+  font-weight: 500;
+}
+
+// Style cho các nút
+button[nz-button] {
+  min-width: 88px;
+}
+
+// Style cho price inputs
+nz-input-number {
+  width: 100%;
+} 
+
+.ant-form-item-label {
+  text-align: left;
+}

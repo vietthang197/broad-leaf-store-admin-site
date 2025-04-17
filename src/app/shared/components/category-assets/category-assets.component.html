@@ -1,0 +1,53 @@
+<div class="avatar-uploader">
+  <nz-upload
+    *ngIf="!avatarUrl"
+    class="avatar-uploader"
+    [nzAction]="uploadUrl"
+    [nzHeaders]="uploadHeaders"
+    nzListType="picture-card"
+    [nzShowUploadList]="false"
+    [nzBeforeUpload]="beforeUpload"
+    (nzChange)="handleChange($event)"
+    [nzData]="uploadExtraData"
+  >
+    <ng-container *ngIf="loading">
+      <nz-spin></nz-spin>
+    </ng-container>
+    <ng-container *ngIf="!loading">
+      <i nz-icon nzType="plus"></i>
+      <div class="ant-upload-text">Tải lên</div>
+    </ng-container>
+  </nz-upload>
+  
+  <div *ngIf="avatarUrl" class="avatar-preview">
+    <img [src]="avatarUrl" alt="avatar" style="width: 100%" />
+    <div class="overlay-actions">
+      <button nz-button nzType="primary" nzShape="circle" (click)="showPreviewImage()">
+        <i nz-icon nzType="eye"></i>
+      </button>
+      <button nz-button nzType="primary" nzShape="circle" nzDanger (click)="removeImage()">
+        <i nz-icon nzType="delete"></i>
+      </button>
+    </div>
+  </div>
+  
+  <div *ngIf="required && !categoryAsset" class="error-message">
+    <i nz-icon nzType="exclamation-circle" nzTheme="outline"></i> Hình ảnh là bắt buộc
+  </div>
+</div>
+
+<div *ngIf="categoryAsset" class="asset-meta">
+  <p><strong>Tên:</strong> {{ categoryAsset.asset.name }}</p>
+</div>
+
+<!-- Modal xem trước ảnh -->
+<nz-modal
+  [nzVisible]="previewVisible"
+  [nzTitle]="previewTitle"
+  [nzFooter]="null"
+  (nzOnCancel)="previewVisible = false"
+>
+  <ng-container *nzModalContent>
+    <img [src]="previewImage" style="width: 100%" />
+  </ng-container>
+</nz-modal> 

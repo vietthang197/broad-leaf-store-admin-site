@@ -73,9 +73,6 @@ export class CategoriesComponent implements OnInit {
   pageSize = 10;
   total = 0;
 
-  isAddCategoryModalVisible = false;
-  addCategoryForm!: FormGroup;
-
   constructor(
     private fb: FormBuilder,
     private message: NzMessageService,
@@ -89,12 +86,6 @@ export class CategoriesComponent implements OnInit {
     this.searchForm = this.fb.group({
       name: [null],
       slug: [null],
-      parentCategoryId: [null]
-    });
-
-    this.addCategoryForm = this.fb.group({
-      name: [null, [Validators.required]],
-      description: [null],
       parentCategoryId: [null]
     });
 
@@ -167,41 +158,6 @@ export class CategoriesComponent implements OnInit {
     const listOfEnabledData = this.listOfData;
     this.checked = listOfEnabledData.every(item => this.setOfCheckedId.has(item.id));
     this.indeterminate = listOfEnabledData.some(item => this.setOfCheckedId.has(item.id)) && !this.checked;
-  }
-
-  showAddCategoryModal(): void {
-    this.isAddCategoryModalVisible = true;
-  }
-
-  handleCancel(): void {
-    this.isAddCategoryModalVisible = false;
-    this.addCategoryForm.reset();
-  }
-
-  submitAddCategory(): void {
-    if (this.addCategoryForm.valid) {
-      this.isLoading = true;
-      const categoryData = this.addCategoryForm.value;
-      
-      this.categoryService.createCategory(categoryData).subscribe({
-        next: () => {
-          this.message.success('Thêm danh mục thành công!');
-          this.handleCancel();
-          this.loadCategories();
-        },
-        error: (error) => {
-          this.isLoading = false;
-          this.message.error('Thêm danh mục thất bại: ' + error.message);
-        }
-      });
-    } else {
-      Object.values(this.addCategoryForm.controls).forEach(control => {
-        if (control.invalid) {
-          control.markAsDirty();
-          control.updateValueAndValidity({ onlySelf: true });
-        }
-      });
-    }
   }
 
   formatDate(date: string): string {

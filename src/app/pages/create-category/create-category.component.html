@@ -1,0 +1,60 @@
+<div class="category-form-container">
+  <div class="category-header">
+    <h2 class="category-title">Tạo danh mục sản phẩm mới</h2>
+  </div>
+  <form nz-form [formGroup]="categoryForm">
+    <nz-card nzTitle="Thông tin cơ bản" class="basic-info-card">
+      
+      <nz-form-item>
+        <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired>Tên danh mục</nz-form-label>
+        <nz-form-control [nzSm]="18" [nzXs]="24" nzErrorTip="Vui lòng nhập tên danh mục!">
+            <input nz-input formControlName="name" placeholder="Tên danh mục" class="full-width" />
+        </nz-form-control>
+      </nz-form-item>
+      
+      <nz-form-item>
+        <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired>Slug (Đường dẫn SEO)</nz-form-label>
+        <nz-form-control [nzSm]="18" [nzXs]="24" nzErrorTip="Vui lòng nhập Slug!">
+          <input nz-input formControlName="slug" placeholder="Slug" class="full-width" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Danh mục cha -->
+      <nz-form-item>
+        <nz-form-label [nzSm]="6" [nzXs]="24">Danh mục cha</nz-form-label>
+        <nz-form-control [nzSm]="18" [nzXs]="24">
+          <div class="category-container">
+            <nz-select formControlName="parentCategoryId" nzPlaceHolder="Chọn danh mục cha" class="category-select" nzAllowClear>
+              <nz-option *ngFor="let category of categories" [nzValue]="category.id" [nzLabel]="category.name"></nz-option>
+            </nz-select>
+          </div>
+        </nz-form-control>
+      </nz-form-item>
+    </nz-card>
+
+    <nz-card nzTitle="Mô tả danh mục" class="basic-info-card">
+      <nz-form-item>
+        <nz-form-label [nzSm]="6" [nzXs]="24">Mô tả</nz-form-label>
+        <nz-form-control [nzSm]="18" [nzXs]="24">
+          <quill-editor
+            formControlName="description"
+            [styles]="{height: '200px'}"
+            [modules]="quillModules"
+            placeholder="Nhập mô tả chi tiết về danh mục">
+          </quill-editor>
+        </nz-form-control>
+      </nz-form-item>
+    </nz-card>
+
+    <nz-card nzTitle="Hình ảnh danh mục" class="basic-info-card">
+      <app-category-assets
+        [initialAsset]="categoryAsset"
+        (assetUpdated)="onAssetUpdated($event)">
+      </app-category-assets>
+    </nz-card>
+
+    <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+      <button nz-button nzType="primary" (click)="submitForm()" [nzLoading]="isSubmitting">Tạo mới danh mục</button>
+    </div>
+  </form>
+</div> 

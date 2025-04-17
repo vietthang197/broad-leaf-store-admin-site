@@ -62,7 +62,7 @@
     <div class="table-header">
       <h3>Dữ liệu</h3>
       <div class="table-actions">
-        <button nz-button nzType="primary" (click)="showAddCategoryModal()">
+        <button nz-button nzType="primary" (click)="router.navigate(['/create-category'])">
           <i nz-icon nzType="plus"></i>Thêm mới
         </button>
         <button nz-button nzType="default" nzShape="circle" (click)="loadCategories()">
@@ -113,43 +113,4 @@
       </tbody>
     </nz-table>
   </nz-card>
-</div>
-
-<!-- Modal thêm mới danh mục -->
-<nz-modal
-  [(nzVisible)]="isAddCategoryModalVisible"
-  nzTitle="Thêm mới danh mục"
-  (nzOnCancel)="handleCancel()"
-  [nzFooter]="modalFooter"
->
-  <ng-container *nzModalContent>
-    <form nz-form [formGroup]="addCategoryForm" [nzLayout]="'vertical'">
-      <nz-form-item>
-        <nz-form-label [nzSpan]="6" nzRequired>Tên danh mục</nz-form-label>
-        <nz-form-control [nzSpan]="18" nzErrorTip="Vui lòng nhập tên danh mục!">
-          <input nz-input formControlName="name" placeholder="Nhập tên danh mục" />
-        </nz-form-control>
-      </nz-form-item>
-
-      <nz-form-item>
-        <nz-form-label [nzSpan]="6">Mô tả</nz-form-label>
-        <nz-form-control [nzSpan]="18">
-          <textarea nz-input formControlName="description" placeholder="Nhập mô tả"></textarea>
-        </nz-form-control>
-      </nz-form-item>
-
-      <nz-form-item>
-        <nz-form-label [nzSpan]="6">Danh mục cha</nz-form-label>
-        <nz-form-control [nzSpan]="18">
-          <nz-select formControlName="parentCategoryId" nzPlaceHolder="Chọn danh mục cha" nzAllowClear>
-            <nz-option *ngFor="let category of categories" [nzValue]="category.id" [nzLabel]="category.name"></nz-option>
-          </nz-select>
-        </nz-form-control>
-      </nz-form-item>
-    </form>
-  </ng-container>
-  <ng-template #modalFooter>
-    <button nz-button nzType="default" (click)="handleCancel()">Hủy</button>
-    <button nz-button nzType="primary" (click)="submitAddCategory()" [disabled]="!addCategoryForm.valid">Xác nhận</button>
-  </ng-template>
-</nz-modal> 
+</div> 
