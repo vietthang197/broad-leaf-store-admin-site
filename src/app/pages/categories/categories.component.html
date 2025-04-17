@@ -1,0 +1,155 @@
+<div class="search-table-container">
+  <nz-breadcrumb>
+    <nz-breadcrumb-item>List</nz-breadcrumb-item>
+    <nz-breadcrumb-item>Danh sách danh mục</nz-breadcrumb-item>
+  </nz-breadcrumb>
+
+  <h2>Bộ lọc</h2>
+
+  <nz-card>
+    <form nz-form [formGroup]="searchForm" [nzLayout]="'vertical'">
+      <div [ngClass]="{ 'hidden-form': isCollapsed }">
+        <div nz-row [nzGutter]="{ xs: 8, sm: 16, md: 24, lg: 32 }">
+          <div nz-col [nzXs]="24" [nzSm]="12" [nzMd]="8" [nzLg]="6">
+            <nz-form-item>
+              <nz-form-label>Tên danh mục</nz-form-label>
+              <nz-form-control>
+                <input nz-input formControlName="name" placeholder="Nhập tên danh mục" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzXs]="24" [nzSm]="12" [nzMd]="8" [nzLg]="6">
+            <nz-form-item>
+              <nz-form-label>Slug</nz-form-label>
+              <nz-form-control>
+                <input nz-input formControlName="slug" placeholder="Nhập slug" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzXs]="24" [nzSm]="12" [nzMd]="8" [nzLg]="6">
+            <nz-form-item>
+              <nz-form-label>Danh mục cha</nz-form-label>
+              <nz-form-control>
+                <nz-select
+                  formControlName="parentCategoryId"
+                  nzPlaceHolder="Chọn danh mục cha"
+                  nzAllowClear
+                >
+                  <nz-option
+                    *ngFor="let category of categories"
+                    [nzValue]="category.id"
+                    [nzLabel]="category.name"
+                  ></nz-option>
+                </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+      </div>
+      <div nz-row>
+        <div nz-col [nzSpan]="24" class="search-buttons">
+          <button nz-button nzType="primary" (click)="search()">Tìm kiếm</button>
+          <button nz-button (click)="reset()">Làm mới</button>
+          <a nz-button nzType="link" (click)="isCollapsed = !isCollapsed">
+            {{ isCollapsed ? 'Mở rộng' : 'Thu gọn' }} <i nz-icon [nzType]="isCollapsed ? 'down' : 'up'"></i>
+          </a>
+        </div>
+      </div>
+    </form>
+  </nz-card>
+
+  <nz-card class="mt-16">
+    <div class="table-header">
+      <h3>Dữ liệu</h3>
+      <div class="table-actions">
+        <button nz-button nzType="primary" (click)="showAddCategoryModal()">
+          <i nz-icon nzType="plus"></i>Thêm mới
+        </button>
+        <button nz-button nzType="default" nzShape="circle" (click)="loadCategories()">
+          <i nz-icon nzType="reload"></i>
+        </button>
+      </div>
+    </div>
+
+    <nz-table
+      #basicTable
+      [nzData]="listOfData"
+      [nzLoading]="isLoading"
+      [nzShowPagination]="true"
+      [nzPageSize]="pageSize"
+      [nzTotal]="total"
+      [nzPageIndex]="pageIndex"
+      (nzPageIndexChange)="onPageChange($event)"
+      (nzPageSizeChange)="onPageSizeChange($event)"
+      [nzScroll]="{ x: '1000px' }"
+    >
+      <thead>
+        <tr>
+          <th [nzWidth]="'60px'" [nzChecked]="checked" [nzIndeterminate]="indeterminate" (nzCheckedChange)="onAllChecked($event)"></th>
+          <th [nzWidth]="'200px'">Tên danh mục</th>
+          <th [nzWidth]="'200px'">Slug</th>
+          <th [nzWidth]="'200px'">Mô tả</th>
+          <th [nzWidth]="'200px'">Danh mục cha</th>
+          <th [nzWidth]="'150px'">Ngày tạo</th>
+          <th [nzWidth]="'150px'">Ngày cập nhật</th>
+          <th [nzWidth]="'150px'">Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let data of basicTable.data">
+          <td [nzChecked]="setOfCheckedId.has(data.id)" (nzCheckedChange)="onItemChecked(data.id, $event)"></td>
+          <td>{{ data?.name }}</td>
+          <td>{{ data?.slug }}</td>
+          <td>{{ data?.description }}</td>
+          <td>{{ getParentCategoryName(data) }}</td>
+          <td>{{ data?.createdAt ? formatDate(data.createdAt) : '' }}</td>
+          <td>{{ data?.updatedAt ? formatDate(data.updatedAt) : '' }}</td>
+          <td>
+            <a (click)="router.navigate(['/edit-category', data.id])">Chỉnh sửa</a>
+            <nz-divider nzType="vertical"></nz-divider>
+            <a nz-popconfirm nzPopconfirmTitle="Bạn có chắc chắn muốn xóa danh mục này?" (nzOnConfirm)="deleteCategory(data.id)">Xóa</a>
+          </td>
+        </tr>
+      </tbody>
+    </nz-table>
+  </nz-card>
+</div>
+
+<!-- Modal thêm mới danh mục -->
+<nz-modal
+  [(nzVisible)]="isAddCategoryModalVisible"
+  nzTitle="Thêm mới danh mục"
+  (nzOnCancel)="handleCancel()"
+  [nzFooter]="modalFooter"
+>
+  <ng-container *nzModalContent>
+    <form nz-form [formGroup]="addCategoryForm" [nzLayout]="'vertical'">
+      <nz-form-item>
+        <nz-form-label [nzSpan]="6" nzRequired>Tên danh mục</nz-form-label>
+        <nz-form-control [nzSpan]="18" nzErrorTip="Vui lòng nhập tên danh mục!">
+          <input nz-input formControlName="name" placeholder="Nhập tên danh mục" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label [nzSpan]="6">Mô tả</nz-form-label>
+        <nz-form-control [nzSpan]="18">
+          <textarea nz-input formControlName="description" placeholder="Nhập mô tả"></textarea>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label [nzSpan]="6">Danh mục cha</nz-form-label>
+        <nz-form-control [nzSpan]="18">
+          <nz-select formControlName="parentCategoryId" nzPlaceHolder="Chọn danh mục cha" nzAllowClear>
+            <nz-option *ngFor="let category of categories" [nzValue]="category.id" [nzLabel]="category.name"></nz-option>
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </ng-container>
+  <ng-template #modalFooter>
+    <button nz-button nzType="default" (click)="handleCancel()">Hủy</button>
+    <button nz-button nzType="primary" (click)="submitAddCategory()" [disabled]="!addCategoryForm.valid">Xác nhận</button>
+  </ng-template>
+</nz-modal> 

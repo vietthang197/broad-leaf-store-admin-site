@@ -26,6 +26,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { Router, ActivatedRoute } from '@angular/router';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { environment } from '../../../../environments/environment';
+import { Title } from '@angular/platform-browser';
 
 interface CustomAttribute {
   name: string;
@@ -118,10 +119,12 @@ export class EditSimpleProductComponent implements OnInit {
     private productService: ProductService,
     private message: NzMessageService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private titleService: Title
   ) {}
 
   ngOnInit(): void {
+    this.titleService.setTitle('Cập nhật sản phẩm');
     this.initForms();
     this.loadCategories();
     
@@ -176,6 +179,8 @@ export class EditSimpleProductComponent implements OnInit {
         if (Array.isArray(product) && product.length > 0) {
           product = product[0]; // Lấy phần tử đầu tiên
         }
+
+        this.titleService.setTitle(`Cập nhật sản phẩm ${product.name}`);
         
         // Cập nhật form
         this.productForm.patchValue({

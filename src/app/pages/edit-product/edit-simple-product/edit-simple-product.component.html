@@ -1,6 +1,6 @@
 <div class="product-form-container">
   <div class="product-header">
-    <h2 class="product-title">Cập nhật sản phẩm đơn giản (SIMPLE product)</h2>
+    <h2 class="product-title">Cập nhật sản phẩm {{productForm.get('name')?.value}}</h2>
   </div>
 
   <nz-spin [nzSpinning]="isLoading" [nzTip]="isSubmitting ? 'Đang cập nhật sản phẩm...' : 'Đang tải thông tin sản phẩm...'" [nzSize]="'large'">

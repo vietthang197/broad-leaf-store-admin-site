@@ -1,0 +1,206 @@
+.search-table-container {
+    padding: 24px;
+    width: 100%;
+  }
+  
+  h2 {
+    margin-bottom: 16px;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.85);
+  }
+  
+  .mt-16 {
+    margin-top: 16px;
+  }
+  
+  // Cải thiện style cho form tìm kiếm
+  nz-form-item {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 16px;
+  }
+  
+  nz-form-label {
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: rgba(0, 0, 0, 0.85);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  
+  nz-form-control {
+    width: 100%;
+  }
+  
+  // Đảm bảo các input có chiều cao đồng nhất
+  input[nz-input], nz-select, nz-date-picker {
+    width: 100%;
+    height: 32px;
+  }
+  
+  .full-width {
+    width: 100%;
+  }
+  
+  // Cải thiện style cho nút tìm kiếm
+  .search-buttons {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+  }
+  
+  // Cải thiện header của bảng
+  .table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  
+  .table-actions {
+    display: flex;
+    gap: 8px;
+  }
+  
+  // Thêm responsive cho các màn hình nhỏ hơn
+  @media (max-width: 768px) {
+    .search-buttons {
+      justify-content: flex-start;
+      margin-top: 8px;
+      
+      button:first-child {
+        margin-left: 0;
+      }
+    }
+    
+    .table-header {
+      flex-direction: column;
+      align-items: flex-start;
+      
+      .table-actions {
+        margin-top: 12px;
+        
+        button:first-child {
+          margin-left: 0;
+        }
+      }
+    }
+  }
+  
+  // Thêm style cho card
+  nz-card {
+  
+    // Card chứa bảng (Enquiry Form)
+    &.mt-16 {
+      // Bỏ các style flex-grow, display: flex, overflow: hidden
+      // Để card có chiều cao tự nhiên theo nội dung
+      ::ng-deep .ant-card-body {
+        // Bỏ flex-grow, overflow: auto
+        padding: 24px;
+      }
+    }
+  
+    width: 100%;
+  }
+  
+  // Cải thiện style cho bảng
+  nz-table {
+    ::ng-deep {
+      .ant-table-wrapper {
+        width: 100%;
+        overflow-x: auto; // Giữ scroll ngang khi cần
+      }
+  
+      .ant-table-container {
+        width: 100%;
+      }
+  
+      .ant-table {
+        width: 100%;
+        min-width: 800px;
+      }
+  
+      .ant-table-thead > tr > th {
+        background-color: #fafafa;
+        font-weight: 500;
+        color: rgba(0, 0, 0, 0.85);
+        white-space: nowrap;
+        // Bỏ position: sticky vì scroll context là inner-content
+        // position: sticky;
+        // top: 0;
+        // z-index: 1;
+      }
+  
+      .ant-table-tbody > tr > td {
+        padding: 16px;
+      }
+  
+      .ant-pagination {
+        margin: 16px 0;
+        padding: 0 24px; // Giữ lại padding
+        // Bỏ position: sticky
+        // position: sticky;
+        // bottom: 0;
+        // background: #fff;
+        // z-index: 1;
+      }
+    }
+  }
+  
+  // Đảm bảo các hàng trong form có khoảng cách đều nhau
+  [nz-row] {
+    margin-bottom: 8px;
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+  
+  // Đảm bảo nội dung nằm trong layout và container chính có thể co giãn
+  :host {
+    display: block;
+    width: 100%; // Component chiếm toàn bộ chiều rộng
+    // Không cần set height ở đây
+  }
+  
+  .search-table-container {
+    padding: 24px;
+    width: 100%;
+    // Bỏ height: 100%, display: flex, overflow: hidden
+    // Để container có chiều cao tự nhiên theo nội dung
+  }
+  
+  // Style cho inner-content (giả định nó nằm ngoài component này)
+  // Bạn cần đặt style này ở global styles (styles.scss) hoặc component cha chứa inner-content
+  /*
+   Hoặc nếu bạn chắc chắn component này luôn nằm trong .inner-content,
+   bạn có thể dùng ::ng-deep nhưng không khuyến khích lắm cho selector ngoài component.
+   Tốt nhất là style trực tiếp cho .inner-content ở nơi nó được định nghĩa.
+  */
+  :host ::ng-deep .inner-content {
+    overflow-y: auto !important; // Thêm scroll dọc cho inner-content
+    height: 100%; // Đảm bảo inner-content có chiều cao để biết khi nào cần scroll
+    // Có thể cần điều chỉnh padding nếu layout gốc có padding
+    // padding: 24px; // Ví dụ
+  }
+  
+  // Đảm bảo layout content không ẩn overflow nếu inner-content là con trực tiếp
+  :host ::ng-deep .ant-layout-content {
+     overflow: visible !important; // Cho phép inner-content quản lý overflow của nó
+     // Hoặc nếu cấu trúc là ant-layout-content > div > inner-content thì không cần dòng này
+  }
+  
+  // Style cho form ẩn/hiện
+  .hidden-form {
+    display: none;
+  }
+  
+  // Thêm CSS cho modal
+  :host ::ng-deep {
+    .ant-modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+  }
+  

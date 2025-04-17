@@ -16,41 +16,8 @@ import {NzMessageService} from 'ng-zorro-antd/message';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 import { Router } from '@angular/router';
-import { ProductService } from '../../services/product.service';
 import { CategoryService } from '../../services/category.service';
-import { environment } from '../../../environments/environment';
 import { Title } from '@angular/platform-browser';
-
-interface Product {
-  id: string;
-  name: string;
-  category: {
-    name: string;
-  };
-  salePrice: {
-    amount: number;
-    currency: string;
-  };
-  regularPrice: {
-    amount: number;
-    currency: string;
-  };
-  cost: {
-    amount: number;
-    currency: string;
-  };
-  quantity: number;
-  availableOnline: boolean;
-  sku: string;
-  primaryAsset: {
-    asset: {
-      id: string;
-      name: string;
-    };
-  };
-  createdAt: string;
-  updatedAt: string;
-}
 
 interface Category {
   id: string;
@@ -58,13 +25,14 @@ interface Category {
   slug: string;
   description: string;
   parentCategoryId: string | null;
-  createdAt: string | null;
-  updatedAt: string | null;
+  parentCategory?: Category;
+  createdAt: string;
+  updatedAt: string;
 }
 
 @Component({
-  selector: 'app-products',
-  templateUrl: './products.component.html',
+  selector: 'app-categories',
+  templateUrl: './categories.component.html',
   imports: [
     NzBreadCrumbComponent,
     NzBreadCrumbItemComponent,
@@ -81,73 +49,59 @@ interface Category {
     NzTableComponent,
     NzThSelectionComponent,
     NzTdAddOnComponent,
-    NzBadgeComponent,
     NzDividerComponent,
     NgForOf,
-    NgIf,
     NzThMeasureDirective,
     NgClass,
     NzModalModule,
     NzPopconfirmModule
   ],
-  styleUrls: ['./products.component.scss'],
+  styleUrls: ['./categories.component.scss'],
   standalone: true
 })
-export class ProductsComponent implements OnInit {
+export class CategoriesComponent implements OnInit {
   searchForm!: FormGroup;
   isCollapsed = false;
   checked = false;
   indeterminate = false;
   setOfCheckedId = new Set<string>();
 
-  listOfData: Product[] = [];
+  listOfData: Category[] = [];
   categories: Category[] = [];
   isLoading = false;
   pageIndex = 1;
   pageSize = 10;
   total = 0;
 
-  isAddProductModalVisible = false;
-  addProductTypeForm!: FormGroup;
+  isAddCategoryModalVisible = false;
+  addCategoryForm!: FormGroup;
 
   constructor(
     private fb: FormBuilder,
     private message: NzMessageService,
     public router: Router,
-    private productService: ProductService,
     private categoryService: CategoryService,
     private titleService: Title
   ) {}
 
   ngOnInit(): void {
-    this.titleService.setTitle('Danh sách sản phẩm');
+    this.titleService.setTitle('Danh sách danh mục');
     this.searchForm = this.fb.group({
       name: [null],
-      sku: [null],
-      category: [null],
-      availableOnline: [null]
+      slug: [null],
+      parentCategoryId: [null]
     });
 
-    this.addProductTypeForm = this.fb.group({
-      productType: [null, [Validators.required]]
+    this.addCategoryForm = this.fb.group({
+      name: [null, [Validators.required]],
+      description: [null],
+      parentCategoryId: [null]
     });
 
     this.loadCategories();
-    this.loadProducts();
   }
 
   loadCategories(): void {
-    this.categoryService.getCategories().subscribe({
-      next: (data) => {
-        this.categories = data;
-      },
-      error: (err) => {
-        console.error('Error loading categories:', err);
-      }
-    });
-  }
-
-  loadProducts(): void {
     this.isLoading = true;
     const params = {
       ...this.searchForm.value,
@@ -155,39 +109,40 @@ export class ProductsComponent implements OnInit {
       size: this.pageSize
     };
 
-    this.productService.getProducts(params).subscribe({
+    this.categoryService.getCategories(params).subscribe({
       next: (response) => {
-        this.listOfData = response.content;
-        this.total = response.totalElements;
+        this.listOfData = response.content || response;
+        this.total = response.totalElements || response.length;
+        this.categories = response.content || response;
         this.isLoading = false;
       },
       error: (error) => {
         this.isLoading = false;
-        this.message.error('Không thể tải danh sách sản phẩm: ' + error.message);
+        this.message.error('Không thể tải danh sách danh mục: ' + error.message);
       }
     });
   }
 
   onPageChange(pageIndex: number): void {
     this.pageIndex = pageIndex;
-    this.loadProducts();
+    this.loadCategories();
   }
 
   onPageSizeChange(pageSize: number): void {
     this.pageSize = pageSize;
     this.pageIndex = 1;
-    this.loadProducts();
+    this.loadCategories();
   }
 
   search(): void {
     this.pageIndex = 1;
-    this.loadProducts();
+    this.loadCategories();
   }
 
   reset(): void {
     this.searchForm.reset();
     this.pageIndex = 1;
-    this.loadProducts();
+    this.loadCategories();
   }
 
   onAllChecked(checked: boolean): void {
@@ -214,35 +169,33 @@ export class ProductsComponent implements OnInit {
     this.indeterminate = listOfEnabledData.some(item => this.setOfCheckedId.has(item.id)) && !this.checked;
   }
 
-  showAddProductModal(): void {
-    this.isAddProductModalVisible = true;
+  showAddCategoryModal(): void {
+    this.isAddCategoryModalVisible = true;
   }
 
   handleCancel(): void {
-    this.isAddProductModalVisible = false;
-    this.addProductTypeForm.reset();
+    this.isAddCategoryModalVisible = false;
+    this.addCategoryForm.reset();
   }
 
-  submitChooseProductType(): void {
-    if (this.addProductTypeForm.valid) {
-      const productType = this.addProductTypeForm.get('productType')?.value;
-      switch(productType){
-        case 'SIMPLE':
-          this.router.navigate(['/create-product/simple']);
+  submitAddCategory(): void {
+    if (this.addCategoryForm.valid) {
+      this.isLoading = true;
+      const categoryData = this.addCategoryForm.value;
+      
+      this.categoryService.createCategory(categoryData).subscribe({
+        next: () => {
+          this.message.success('Thêm danh mục thành công!');
           this.handleCancel();
-          break;
-        case 'VARIANT':
-          this.handleCancel();
-          break;
-        case 'GROUPED':
-          this.handleCancel();
-          break;
-        case 'EXTERNAL':
-          this.handleCancel();
-          break;
-      }
+          this.loadCategories();
+        },
+        error: (error) => {
+          this.isLoading = false;
+          this.message.error('Thêm danh mục thất bại: ' + error.message);
+        }
+      });
     } else {
-      Object.values(this.addProductTypeForm.controls).forEach(control => {
+      Object.values(this.addCategoryForm.controls).forEach(control => {
         if (control.invalid) {
           control.markAsDirty();
           control.updateValueAndValidity({ onlySelf: true });
@@ -251,32 +204,26 @@ export class ProductsComponent implements OnInit {
     }
   }
 
-  formatPrice(price: { amount: number, currency: string }): string {
-    return `${price.amount.toLocaleString()} ${price.currency}`;
-  }
-
   formatDate(date: string): string {
+    if (!date) return '';
     return new Date(date).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
   }
 
-  deleteProduct(id: string): void {
+  deleteCategory(id: string): void {
     this.isLoading = true;
-    this.productService.deleteProduct(id).subscribe({
+    this.categoryService.deleteCategory(id).subscribe({
       next: () => {
-        this.message.success('Xóa sản phẩm thành công!');
-        this.loadProducts();
+        this.message.success('Xóa danh mục thành công!');
+        this.loadCategories();
       },
       error: (error) => {
         this.isLoading = false;
-        this.message.error('Xóa sản phẩm thất bại: ' + error.message);
+        this.message.error('Xóa danh mục thất bại: ' + error.message);
       }
     });
   }
-  
-  getAssetUrl(asset: any): string {
-    if (!asset || !asset.asset || !asset.asset.id) {
-      return 'assets/images/no-image.png';
-    }
-    return `${environment.cdnBaseUrl}/api/v1/asset/download/${asset.asset.id}`;
+
+  getParentCategoryName(category: Category): string {
+    return category.parentCategory ? category.parentCategory.name : 'N/A';
   }
-}
+} 
