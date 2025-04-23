@@ -158,7 +158,7 @@ export class ProductsComponent implements OnInit {
     this.productService.getProducts(params).subscribe({
       next: (response) => {
         this.listOfData = response.content;
-        this.total = response.totalElements;
+        this.total = response.pageInfo.totalElements;
         this.isLoading = false;
       },
       error: (error) => {

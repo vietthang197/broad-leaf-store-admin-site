@@ -103,7 +103,7 @@ export class CategoriesComponent implements OnInit {
     this.categoryService.getCategories(params).subscribe({
       next: (response) => {
         this.listOfData = response.content || response;
-        this.total = response.totalElements || response.length;
+        this.total = response.pageInfo?.totalElements || response.totalElements || response.length;
         this.categories = response.content || response;
         this.isLoading = false;
       },

@@ -81,6 +81,9 @@
       [nzPageIndex]="pageIndex"
       (nzPageIndexChange)="onPageChange($event)"
       (nzPageSizeChange)="onPageSizeChange($event)"
+      [nzFrontPagination]="false"
+      [nzShowSizeChanger]="true"
+      [nzPageSizeOptions]="[10, 20, 30, 40, 50]"
       [nzScroll]="{ x: '1000px' }"
     >
       <thead>

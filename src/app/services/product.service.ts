@@ -37,7 +37,7 @@ export class ProductService {
     }
     
     // Thêm tham số phân trang
-    httpParams = httpParams.set('page', params.pageIndex - 1 || 0);
+    httpParams = httpParams.set('page', params.page !== undefined ? params.page : 0);
     httpParams = httpParams.set('size', params.size || 10);
 
     return this.http.get<any>(`${environment.apiUrl}/api/v1/products`, { params: httpParams });
@@ -48,6 +48,6 @@ export class ProductService {
   }
 
   deleteProduct(id: string): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}/${id}`);
+    return this.http.delete<any>(`${environment.apiUrl}/api/v1/products/${id}`);
   }
 } 
