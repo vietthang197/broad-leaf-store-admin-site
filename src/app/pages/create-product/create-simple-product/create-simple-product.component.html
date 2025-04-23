@@ -27,10 +27,10 @@
 
       <!-- Danh mục chính -->
       <nz-form-item>
-        <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired>Loại sản phẩm</nz-form-label>
-        <nz-form-control [nzSm]="18" [nzXs]="24" nzErrorTip="Vui lòng chọn loại sản phẩm!">
+        <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired>Danh mục sản phẩm</nz-form-label>
+        <nz-form-control [nzSm]="18" [nzXs]="24" nzErrorTip="Vui lòng chọn danh mục sản phẩm!">
           <div class="category-container">
-            <nz-select formControlName="category" nzPlaceHolder="Chọn loại sản phẩm" class="category-select">
+            <nz-select formControlName="category" nzPlaceHolder="Chọn danh mục sản phẩm" class="category-select">
               <nz-option *ngFor="let category of categories" [nzValue]="category.id" [nzLabel]="category.name"></nz-option>
             </nz-select>
           </div>
